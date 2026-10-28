@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <b>Ticker Transfer</b>
+    <div class="tabs" role="tablist">
+      <button id="tabImport" role="tab">Import</button>
+      <button id="tabExport" role="tab">Export</button>
+    </div>
+  </header>
+
+  <main id="import" hidden>
+    <p class="hint" id="imHint">Adds a list to the open watchlist.</p>
+    <div id="imPage" class="status">Checking this tab…</div>
+    <textarea id="imText" spellcheck="false" rows="6" placeholder="Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB"></textarea>
+    <div class="cached" id="imFrom" hidden></div>
+    <div class="sum" id="imSum"></div>
+    <div id="imGroups" class="groups"></div>
+    <ul id="imNotes" class="notes"></ul>
+    <div class="row">
+      <button id="imGo" class="go" disabled>Add to Kite</button>
+      <button id="imUseLast" class="plain" hidden>Use the last export</button>
+    </div>
+    <div id="imMsg" class="status" hidden></div>
+  </main>
+
+  <main id="export" hidden>
+    <p class="hint">Copies the active watchlist on this tab (TradingView or Zerodha Kite).</p>
+    <div id="status" class="status">Reading the watchlist…</div>
+    <details id="details" hidden><summary>Details</summary><pre id="detailsText"></pre></details>
+    <div class="row"><button id="again" class="plain">Read again</button></div>
+
+    <div id="result" hidden>
+      <div class="target" id="target"></div>
+      <div class="cached" id="cached" hidden></div>
+      <div class="sum" id="sum"></div>
+      <textarea id="text" readonly spellcheck="false" rows="7"></textarea>
+      <div class="row">
+        <button id="copy" class="go">Copy</button>
+        <button id="download" class="plain">Download .txt</button>
+      </div>
+      <ul id="notes" class="notes"></ul>
+    </div>
+  </main>
+
+  <script src="../shared/normalize.js"></script>
+  <script src="../shared/listformat.js"></script>
+  <script src="../shared/tvexport.js"></script>
+  <script src="../content/tradingview-reader.js"></script>
+  <script src="../content/tradingview-importer.js"></script>
+  <script src="import.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

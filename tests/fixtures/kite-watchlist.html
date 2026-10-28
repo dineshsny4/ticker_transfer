@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fake Kite watchlist (test fixture)</title>
+<style>
+  .marketwatch { width: 420px; font: 13px sans-serif; }
+  .results-item { padding: 2px 4px; }
+  .group { padding: 2px 4px; background: #eee; }
+</style>
+</head>
+<body>
+<!-- Same classes as the real Kite page (from the user's DOM capture). Behaviour copies Kite:
+     a click on a search result adds the stock to the selected group (or the first group),
+     "New group" opens a form, and Create makes the group and selects it. -->
+<div class="marketwatch marketwatch-wrap">
+  <div class="marketwatch-top perspective">
+    <div class="omnisearch global-search">
+      <header class="search-header"><div class="search"><div class="su-input-group"><input type="text" placeholder="Search eg: infy bse, nifty fut, index fund, etc"></div></div></header>
+      <ul role="listbox" class="omnisearch-results" hidden></ul>
+    </div>
+    <div class="flex-block watch-info-wrapper-top">
+      <div class="watch-info"><button type="button" class="btn-plain watch-selector-trigger"><span class="watch-name truncate">W7</span> <span class="count">(0 / 250)</span></button></div>
+      <div><button type="button" class="btn-plain btn-primary" data-tooltip-content="Create a group"><span class="icon icon-plus"></span> New group</button></div>
+    </div>
+  </div>
+  <div class="marketwatch-content"><div class="items-wrapper"><div class="draggable-wrapper" id="groups"></div><div id="formSlot"></div></div></div>
+</div>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  // The instruments that Kite knows: NSE and BSE. LISTEDBSE is on BSE only.
+  // SKYGOLD-BE: Kite shows some NSE stocks with a series suffix. ABC&D: an "&" name that is not in
+  // the fixed table in normalize.js.
+  const KNOWN = ['DCMSRIND','PCJEWELLER','SHANTIGOLD','SKYGOLD-BE','SSWL','ORIENTCABL','KROSS','M&M','BAJAJ-AUTO','ABC&D','AEGISLOG','ACC','ABB'];
+  const BSE_ONLY = ['LISTEDBSE'];
+  const LIMIT = Number(q.get('limit') || 250);
+
+  // Watch data, like Kite: groups[0] is the default group.
+  const watch = { groups: [{ id: 'GROUP:default', name: 'Default', items: [] }] };
+  for (const g of (q.get('groups') || '').split(',').filter(Boolean)) watch.groups.push({ id: 'GROUP:' + g, name: g, items: [] });
+  for (const s of (q.get('existing') || '').split(',').filter(Boolean)) watch.groups[0].items.push(s);
+  // ?fill=WEEKLY:A|B;MONTHLY:C puts stocks into named groups (for the Export test).
+  for (const part of (q.get('fill') || '').split(';').filter(Boolean)) {
+    const [gname, list] = part.split(':');
+    let g = watch.groups.find((x) => x.name === gname);
+    if (!g) { g = { id: 'GROUP:' + gname, name: gname, items: [] }; watch.groups.push(g); }
+    g.items.push(...list.split('|'));
+  }
+  let selectedId = q.get('selected') ? 'GROUP:' + q.get('selected') : null;
+  window.__clicks = [];
+
+  const $ = (s) => document.querySelector(s);
+  const total = () => watch.groups.reduce((n, g) => n + g.items.length, 0);
+  const has = (s) => watch.groups.some((g) => g.items.includes(s));
+
+  function renderList() {
+    $('.count').textContent = `(${total()} / ${LIMIT})`;
+    const box = $('#groups');
+    box.innerHTML = '';
+    watch.groups.forEach((g) => {
+      if (g.id === 'GROUP:default' && !g.items.length) return; // Kite hides an empty default group
+      const w = document.createElement('div');
+      w.className = `group-wrapper draggable-group color-null id-${g.id}` + (selectedId === g.id ? ' selected' : '');
+      w.innerHTML = `<div class="group flex-block"><div class="column-left group-name text-bold"><span class="name truncate"></span> <span class="count text-light truncate"></span></div></div><div class="items"></div>`;
+      w.querySelector('.name').textContent = g.name;
+      if (g.items.length) w.querySelector('.count').textContent = `(${g.items.length})`;
+      w.querySelector('.group').addEventListener('click', () => { window.__clicks.push('group:' + g.name); if (selectedId !== g.id) selectedId = g.id; renderList(); });
+      for (const s of g.items) {
+        const it = document.createElement('div');
+        it.className = 'item-wrapper draggable-item';
+        it.setAttribute('data-id', 'NSE:INE' + s);
+        it.innerHTML = '<div class="item"><div class="symbol"><span class="name"></span></div></div>';
+        it.querySelector('.name').textContent = s;
+        w.querySelector('.items').append(it);
+      }
+      box.append(w);
+    });
+  }
+
+  function addItem(sym) {
+    if (has(sym) || total() >= LIMIT) return;
+    const idx = Math.max(0, watch.groups.findIndex((g) => g.id === selectedId));
+    watch.groups[idx].items.push(sym);
+    renderList();
+  }
+
+  // Search: results show after a short delay, like Kite.
+  const input = $('.omnisearch input');
+  const ul = $('.omnisearch-results');
+  input.addEventListener('input', () => {
+    const v = input.value.trim().toUpperCase();
+    setTimeout(() => {
+      ul.innerHTML = '';
+      ul.hidden = !v;
+      if (!v) return;
+      const rows = [];
+      // Prefix search, like Kite: "SKYGOLD" also finds "SKYGOLD-BE".
+      for (const n of KNOWN.filter((n) => n.startsWith(v))) rows.push([n, 'NSE'], [n, 'BSE']);
+      for (const n of BSE_ONLY.filter((n) => n.startsWith(v))) rows.push([n, 'BSE']);
+      rows.push(['ACC', 'NSE'], ['ABB', 'NSE']); // unrelated rows, as Kite shows
+      for (const [name, ex] of rows) {
+        const li = document.createElement('li');
+        li.className = `results-item ${ex} local`;
+        li.innerHTML = `<div class="item-wrap"><div class="item"><div class="name"><span></span></div><div class="description"></div></div><div class="tags"><div class="tag ${ex}">${ex}</div></div></div>`;
+        li.querySelector('.name > span').textContent = name;
+        if (ex === 'NSE' && has(name)) li.querySelector('.name').insertAdjacentHTML('beforeend', '<span class="ins-added-label"></span>');
+        li.addEventListener('click', () => { window.__clicks.push('result:' + ex + ':' + name); addItem(name); input.value = ''; ul.innerHTML = ''; ul.hidden = true; });
+        ul.append(li);
+      }
+    }, 120);
+  });
+
+  // New group form.
+  $('.watch-info-wrapper-top .btn-primary').addEventListener('click', () => {
+    window.__clicks.push('newGroup');
+    $('#formSlot').innerHTML = `<div class="group-form"><form><div class="name su-input-group"><input type="text" placeholder="Enter group name here" maxlength="100"></div>
+      <div class="form-actions text-right"><button disabled type="submit" class="button-small button-blue">Create </button> <button type="button" class="button-small button-outline">Close </button></div></form></div>`;
+    const gi = $('.group-form input');
+    const sub = $('.group-form button[type="submit"]');
+    gi.addEventListener('input', () => { sub.disabled = !gi.value.trim(); });
+    $('.group-form form').addEventListener('submit', (e) => e.preventDefault());
+    sub.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.__clicks.push('create:' + gi.value);
+      const g = { id: 'GROUP:n' + watch.groups.length, name: gi.value, items: [] };
+      $('#formSlot').innerHTML = '';
+      setTimeout(() => { watch.groups.push(g); selectedId = g.id; renderList(); }, 200);
+    });
+  });
+
+  renderList();
+  window.__watch = watch;
+</script>
+</body>
+</html>

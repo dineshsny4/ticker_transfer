@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Reader test runner</title></head>
+<body>
+<!-- Loads the fixture in a frame of the same origin, runs the reader in it, and writes the result into #out. -->
+<iframe id="f" style="width:1000px;height:700px"></iframe>
+<pre id="out">PENDING</pre>
+<script src="../../content/tradingview-reader.js"></script>
+<script src="../../shared/tvexport.js"></script>
+<script>
+  const f = document.getElementById('f');
+  f.src = 'tradingview-watchlist.html' + location.search;
+  f.onload = async () => {
+    const w = f.contentWindow;
+    // Run the two functions inside the fixture page, as Firefox does with executeScript({ func }).
+    const start = w.eval('(' + tvStartRead.toString() + ')()');
+    let poll;
+    for (let i = 0; i < 400; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+      poll = w.eval('(' + tvPollRead.toString() + ')()');
+      if (poll.state !== 'running') break;
+    }
+    const res = poll.result;
+    const out = res && res.ok ? WT.tvexport.buildExport(res.rows) : null;
+    document.getElementById('out').textContent = JSON.stringify({ started: start.started, ok: res && res.ok, error: res && res.error, message: res && res.message, listName: res && res.listName, notes: res && res.notes, out });
+  };
+</script>
+</body>
+</html>

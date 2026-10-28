@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fake TradingView watchlist (test fixture)</title>
+<style>
+  body { margin: 0; font: 13px sans-serif; }
+  #side { position: fixed; right: 0; top: 0; width: 300px; height: 100vh; border-left: 1px solid #ccc; }
+  #hot [data-symbol-full] { height: 20px; }
+  #scroll { position: relative; height: 240px; overflow-y: auto; }
+  #inner { position: relative; }
+  .row { position: absolute; left: 0; right: 0; height: 30px; line-height: 30px; padding-left: 8px; box-sizing: border-box; }
+  .sec { background: #eee; font-weight: bold; }
+</style>
+</head>
+<body>
+<!-- Another widget with the same rows. The reader must not read it. -->
+<div id="hot"><div data-symbol-full="NSE:WRONGLIST">WRONGLIST</div></div>
+
+<div id="side">
+  <div class="head"><button data-name="watchlists-button">My Swing List</button></div>
+  <div id="scroll"><div id="inner"></div></div>
+</div>
+
+<script>
+  // The list, in the same order as the user's example. A "###" item is a section header.
+  const ITEMS = (new URLSearchParams(location.search).get('list') ||
+    '###WEEKLY,NSE:DCMSRIND,NSE:PCJEWELLER,###MONTHLY,NSE:SHANTIGOLD,NSE:SKYGOLD,NSE:SSWL,NSE:ORIENTCABL,###QUATERLY,NSE:RATNAVEER,NSE:TFCILTD,NSE:RAYMOND,NSE:TECHNOCRAF,NSE:MARINE,NSE:INDOMIM,NSE:DHOOTTRANS,NSE:MOLBIO,NSE:SHUKRAPHAR,NSE:MVELECTRO,NSE:KROSS,NSE:WELCORP,NSE:CYIENT,NSE:CUPID,NSE:SHILPAMED,NSE:MANINDS,NSE:STEAMHOUSE,NSE:PVRINOX,NSE:REDINGTON,NSE:RBA,NSE:SAMBHV,###SEMI ANNUALLY,NSE:FCL,NSE:CYIENTDLM,NSE:IBULLSLTD,NSE:IOLCP,NSE:SHADOWFAX,NSE:AEGISLOG,NSE:ANTELOPUS,NSE:LAURUSLABS,NSE:CEMPRO,NSE:AVALON,NSE:PAISALO,NSE:GRWRHITECH,NSE:CARTRADE,NSE:OPTIEMUS,NSE:CPPLUS,NSE:KISSHT,NSE:GLAND,NSE:COFORGE,NSE:SANSERA,NSE:WELSPUNLIV,NSE:OMNI,NSE:RUBICON,NSE:ATHERENERG,NSE:AEROFLEX,NSE:RRKABEL,BSE:500325'
+  ).split(',');
+  const COLLAPSED = new Set((new URLSearchParams(location.search).get('collapsed') || '').split(',').filter(Boolean));
+
+  // Hide the symbols of a collapsed section, as TradingView does.
+  const shown = [];
+  let hide = false;
+  for (const it of ITEMS) {
+    if (it.startsWith('###')) { hide = COLLAPSED.has(it.slice(3)); shown.push(it); }
+    else if (!hide) shown.push(it);
+  }
+
+  if (new URLSearchParams(location.search).has("closed")) document.getElementById("side").remove();
+  const H = 30;
+  const scroll = document.getElementById('scroll');
+  const inner = document.getElementById('inner');
+  inner.style.height = shown.length * H + 'px';
+
+  // Draw only the rows that are in view (a virtual list), like TradingView.
+  function draw() {
+    const first = Math.max(0, Math.floor(scroll.scrollTop / H) - 1);
+    const last = Math.min(shown.length, Math.ceil((scroll.scrollTop + scroll.clientHeight) / H) + 1);
+    inner.innerHTML = '';
+    for (let i = first; i < last; i++) {
+      const it = shown[i];
+      const d = document.createElement('div');
+      d.className = 'row';
+      d.style.top = i * H + 'px';
+      if (it.startsWith('###')) {
+        // TradingView's header row: data-collapsed, and the name as text without "###".
+        d.classList.add('sec');
+        d.setAttribute('data-collapsed', COLLAPSED.has(it.slice(3)) ? 'true' : 'false');
+        d.innerHTML = '<div><span>' + it.slice(3).toLowerCase() + '</span></div>';
+      } else {
+        d.setAttribute('data-symbol-full', it);
+        d.textContent = it.split(':')[1];
+      }
+      inner.append(d);
+    }
+  }
+  // Redraw when the scroll position changes. A timer is used because headless browsers
+  // do not always send scroll events. The delay (ms) is set by ?delay=, to test slow pages.
+  const DELAY = Number(new URLSearchParams(location.search).get('delay') || 0);
+  let lastTop = -1;
+  setInterval(() => {
+    if (scroll.scrollTop === lastTop) return;
+    lastTop = scroll.scrollTop;
+    setTimeout(draw, DELAY);
+  }, 16);
+  draw();
+</script>
+</body>
+</html>

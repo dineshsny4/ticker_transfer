@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Kite importer test runner</title></head>
+<body>
+<!-- Loads the fake Kite page in a frame, injects content/kite-importer.js with a fake
+     browser.runtime, sends a kite-import message, and writes the end state into #out. -->
+<iframe id="f" style="width:1000px;height:800px"></iframe>
+<pre id="out">PENDING</pre>
+<script>
+  const params = new URLSearchParams(location.search);
+  const sections = JSON.parse(params.get('sections') || '[]');
+  const f = document.getElementById('f');
+  params.delete('sections');
+  f.src = 'kite-watchlist.html?' + params.toString();
+  f.onload = async () => {
+    const w = f.contentWindow;
+    w.browser = { runtime: { onMessage: { addListener: (fn) => { w.__listener = fn; } } } };
+    w.eval(await (await fetch('../../shared/normalize.js')).text());
+    w.eval(await (await fetch('../../content/kite-importer.js')).text());
+    // ?mode=export reads the list for Export and stops.
+    if (params.get('mode') === 'export') {
+      document.getElementById('out').textContent = JSON.stringify(await w.__listener({ type: 'kite-export' }));
+      return;
+    }
+    const info = await w.__listener({ type: 'kite-info' });
+    const start = await w.__listener({ type: 'kite-import', sections });
+    // ?stopAfter=ms presses the Stop button on the panel.
+    if (params.get('stopAfter')) setTimeout(() => { const h = w.document.getElementById('wt-import-panel'); const b = h && [...h.shadowRoot.querySelectorAll('button')].find((x) => x.textContent === 'Stop'); if (b) b.click(); }, Number(params.get('stopAfter')));
+    // Wait for the panel to show "Done".
+    let panelText = '';
+    for (let i = 0; i < 600; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+      const host = w.document.getElementById('wt-import-panel');
+      const done = host && [...host.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'Done');
+      if (done) { panelText = host.shadowRoot.textContent.replace(/\s+/g, ' ').replace(/.*?(?=Ticker Transfer×)/, ''); break; }
+    }
+    const groups = w.__watch.groups.map((g) => ({ name: g.name, items: g.items.slice() }));
+    document.getElementById('out').textContent = JSON.stringify({ info: { ok: info.ok, watchName: info.watchName, count: info.count, limit: info.limit }, start, groups, clicks: w.__clicks, panel: panelText.slice(-600) });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Fake TradingView Add symbol (test fixture)</title></head>
+<body>
+<!-- Same markers as the real page (user DOM capture). Behaviour copies TradingView's dialog
+     code (chunk 26873, wt): on Enter (keyCode 13) in the search box, text with a comma is
+     split and every item is added; the dialog then closes. Duplicates are not added. -->
+<div id="wl">
+  <button data-name="watchlists-button">My List</button>
+  <button aria-label="Add symbol" data-role="button" type="button" data-name="add-symbol-button">+</button>
+</div>
+<div id="dlgSlot"></div>
+<pre id="list"></pre>
+<script>
+  const list = (new URLSearchParams(location.search).get('existing') || '').split(',').filter(Boolean);
+  const show = () => (document.getElementById('list').textContent = list.join(','));
+  document.querySelector('[data-name="add-symbol-button"]').addEventListener('click', () => {
+    document.getElementById('dlgSlot').innerHTML =
+      '<div role="dialog" data-name="watchlist-symbol-search-dialog"><input data-qa-id="symbol-search-input" data-role="search" type="text"></div>';
+    const input = document.querySelector('[data-qa-id="symbol-search-input"]');
+    input.addEventListener('keydown', (e) => {
+      if (e.keyCode !== 13) return;
+      e.preventDefault();
+      const r = input.value;
+      if (r.includes(',')) for (const t of r.split(',').map((x) => x.trim()).filter(Boolean)) if (!list.includes(t)) list.push(t);
+      show();
+      setTimeout(() => (document.getElementById('dlgSlot').innerHTML = ''), 100);
+    });
+  });
+  show();
+</script>
+</body>
+</html>
