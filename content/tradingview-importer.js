@@ -12,7 +12,8 @@
 // Each function must not use anything outside itself.
 //
 // tvStartImport(text) starts the import and returns at once. The result goes as JSON into an
-// attribute on <html>. tvPollImport() returns it when it is ready.
+// attribute on <html>. tvPollImport() returns it when it is ready. The popup shows the progress
+// and the result in its Import tab.
 
 /* exported tvStartImport, tvPollImport */
 
@@ -77,11 +78,27 @@ function tvStartImport(text) {
     return { ok: true, listName };
   }
 
+  // The result goes into the attribute with the text that the popup shows: message, kind
+  // ('good' | 'bad') and retryAll (TradingView takes the whole list or nothing, so Retry sends
+  // the same list again).
+  const ERRORS = {
+    'panel-closed': 'Open the Watchlist panel on the right side of the chart, then try again.',
+    'no-add-button': 'The "Add symbol" button of the watchlist was not found.',
+    'no-dialog': 'The "Add symbol" dialog did not open.',
+    'text-not-set': 'The list could not be put into the "Add symbol" box.',
+    'not-accepted': 'TradingView did not take the list. The "Add symbol" dialog is still open. Press Enter in it, or close it.',
+  };
+  function withMessage(r) {
+    if (r.ok) return { ...r, kind: 'good', message: `Done. TradingView took the list into "${r.listName}". Check the list in the Watchlist panel.` };
+    const message = r.error === 'exception' ? `Could not add the list: ${r.message}` : ERRORS[r.error] || `Could not add the list (${r.error}).`;
+    return { ...r, kind: 'bad', message, retryAll: true };
+  }
+
   if (html.getAttribute(ATTR) === 'running') return { started: false, error: 'running' };
   html.setAttribute(ATTR, 'running');
   run()
-    .then((r) => html.setAttribute(ATTR, JSON.stringify(r)))
-    .catch((e) => html.setAttribute(ATTR, JSON.stringify({ ok: false, error: 'exception', message: String((e && e.message) || e) })));
+    .catch((e) => ({ ok: false, error: 'exception', message: String((e && e.message) || e) }))
+    .then((r) => html.setAttribute(ATTR, JSON.stringify(withMessage(r))));
   return { started: true };
 }
 

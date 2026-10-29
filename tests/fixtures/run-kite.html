@@ -24,18 +24,17 @@
     }
     const info = await w.__listener({ type: 'kite-info' });
     const start = await w.__listener({ type: 'kite-import', sections });
-    // ?stopAfter=ms presses the Stop button on the panel.
-    if (params.get('stopAfter')) setTimeout(() => { const h = w.document.getElementById('wt-import-panel'); const b = h && [...h.shadowRoot.querySelectorAll('button')].find((x) => x.textContent === 'Stop'); if (b) b.click(); }, Number(params.get('stopAfter')));
-    // Wait for the panel to show "Done".
-    let panelText = '';
+    // ?stopAfter=ms sends kite-stop, as the popup's Stop button does.
+    if (params.get('stopAfter')) setTimeout(() => w.__listener({ type: 'kite-stop' }), Number(params.get('stopAfter')));
+    // Read kite-status, as the popup does, until the run ends.
+    let status = null;
     for (let i = 0; i < 600; i++) {
       await new Promise((r) => setTimeout(r, 100));
-      const host = w.document.getElementById('wt-import-panel');
-      const done = host && [...host.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'Done');
-      if (done) { panelText = host.shadowRoot.textContent.replace(/\s+/g, ' ').replace(/.*?(?=Ticker Transfer×)/, ''); break; }
+      status = await w.__listener({ type: 'kite-status' });
+      if (!status.running) break;
     }
     const groups = w.__watch.groups.map((g) => ({ name: g.name, items: g.items.slice() }));
-    document.getElementById('out').textContent = JSON.stringify({ info: { ok: info.ok, watchName: info.watchName, count: info.count, limit: info.limit }, start, groups, clicks: w.__clicks, panel: panelText.slice(-600) });
+    document.getElementById('out').textContent = JSON.stringify({ info: { ok: info.ok, watchName: info.watchName, count: info.count, limit: info.limit }, start, groups, clicks: w.__clicks, status });
   };
 </script>
 </body>

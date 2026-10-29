@@ -6,11 +6,13 @@
   const SITES = {
     tradingview: { name: 'TradingView', url: /^https:\/\/([a-z0-9-]+\.)*tradingview\.com\//i },
     kite: { name: 'Zerodha Kite', url: /^https:\/\/kite\.zerodha\.com\//i },
+    dhan: { name: 'Dhan', url: /^https:\/\/tv\.dhan\.co\//i },
   };
 
   const MESSAGES = {
-    'no-site': 'Open a TradingView chart or Zerodha Kite in this tab, then click the icon again.',
-    'panel-closed': 'Open the Watchlist panel on the right side of the TradingView chart, then click Read again.',
+    'no-site': 'Open a TradingView chart, Zerodha Kite or Dhan (tv.dhan.co) in this tab, then click the icon again.',
+    'no-chart': 'The Dhan chart is not loaded yet. Wait for the chart, then click Read again.',
+    'panel-closed': 'Open the Watchlist panel on the right side of the chart, then click Read again.',
     'no-watchlist': 'The Kite watchlist is not on the screen. Show it on the left (make the window wider if it is hidden), then click Read again.',
   };
 
@@ -20,43 +22,53 @@
     return Object.keys(SITES).find((k) => tab && SITES[k].url.test(tab.url || '')) || null;
   }
 
-  function showStatus(text, bad) {
-    $('status').hidden = false;
-    $('status').textContent = text;
-    $('status').classList.toggle('bad', !!bad);
-    $('result').hidden = true;
-  }
+  const UI = globalThis.WTUI;
 
-  function addNote(text) {
-    const li = document.createElement('li');
-    li.textContent = text;
-    $('notes').append(li);
+  // busy: show a spinner (a read is running). bad: show the text as an error.
+  function showStatus(text, bad, busy) {
+    $('status').hidden = false;
+    UI.card($('status'), { text, state: bad ? 'bad' : busy ? 'busy' : 'idle' });
+    $('result').hidden = true;
+    $('copy').hidden = true;
+    $('download').hidden = true;
+    if (!busy) {
+      $('exProg').hidden = true;
+      $('exStop').hidden = true;
+    }
   }
 
   // readAt: the time of an earlier read, when the result comes from storage. Else null.
   function showResult(siteName, listName, out, notes, readAt) {
     $('status').hidden = true;
+    $('exProg').hidden = true;
+    $('exStop').hidden = true;
     $('result').hidden = false;
-    $('target').textContent = `${siteName} · list ${listName || '(no name)'}`;
-    $('cached').hidden = !readAt;
+    $('copy').hidden = false;
+    $('download').hidden = false;
+    $('target').textContent = `${siteName} · ${listName || '(no name)'}`;
+    $('result').querySelector('.site').className = `site${readAt ? ' idle' : ''}`;
     if (readAt) {
       const t = new Date(readAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
       $('cached').textContent = `Read before, on ${t}. If the list changed, click Read again.`;
+    } else {
+      $('cached').textContent = 'Active watchlist, read from the page';
     }
-    $('sum').innerHTML = '';
-    const b = document.createElement('b');
-    b.textContent = out.symbols;
-    $('sum').append(b, ` NSE symbols · ${out.sections} section${out.sections === 1 ? '' : 's'}`);
+    const skipped = out.skipped || [];
+    UI.stats($('sum'), [
+      [out.symbols, 'NSE symbols'],
+      [out.sections, siteName === 'Zerodha Kite' ? 'groups' : 'sections'],
+      [skipped.length, 'left out', skipped.length > 0],
+    ]);
     $('text').value = out.text;
-    $('notes').innerHTML = '';
-    for (const n of notes || []) addNote(n);
-    if (out.collapsed.length) {
-      addNote(`Collapsed: ${out.collapsed.join(', ')}. The symbols in a collapsed section or group are not read. Expand it and click Read again to include them.`);
+    $('notes').textContent = '';
+    for (const n of notes || []) UI.note($('notes'), n, 'info');
+    if (out.collapsed && out.collapsed.length) {
+      UI.note($('notes'), `Collapsed: ${out.collapsed.join(', ')}. The symbols in a collapsed section or group are not read. Expand it and click Read again to include them.`);
     }
-    if (out.skipped.length) {
-      const shown = out.skipped.slice(0, 8).join(', ');
-      const more = out.skipped.length > 8 ? ` and ${out.skipped.length - 8} more` : '';
-      addNote(`Not NSE, left out (${out.skipped.length}): ${shown}${more}.`);
+    if (skipped.length) {
+      const shown = skipped.slice(0, 8).join(', ');
+      const more = skipped.length > 8 ? ` and ${skipped.length - 8} more` : '';
+      UI.note($('notes'), `Not NSE, left out (${skipped.length}): ${shown}${more}.`);
     }
   }
 
@@ -89,6 +101,11 @@
         await globalThis.WTImport.ensureKite(tab);
         const info = await browser.tabs.sendMessage(tab.id, { type: 'kite-info' });
         return info && info.ok ? info.watchName : null;
+      }
+      if (site === 'dhan') {
+        await globalThis.WTImport.ensureDhan(tab);
+        const info = await browser.tabs.sendMessage(tab.id, { type: 'dhan-info' });
+        return info && info.ok ? info.listName : null;
       }
       let r = await browser.scripting.executeScript({ target: { tabId: tab.id }, func: tvListName });
       let name = r.map((x) => x.result).find(Boolean);
@@ -175,15 +192,42 @@
     }
   }
 
+  // Read the open Dhan watchlist. A Dhan row shows only the company name, so the page script
+  // looks up each ticker in Dhan's search. This takes about one second for each symbol.
+  async function readDhan(tab) {
+    try {
+      await globalThis.WTImport.ensureDhan(tab);
+      let s = await browser.tabs.sendMessage(tab.id, { type: 'dhan-status' });
+      if (!s.running) {
+        const r = await browser.tabs.sendMessage(tab.id, { type: 'dhan-export' });
+        if (!r.ok && r.error !== 'running') return r;
+      }
+      for (;;) {
+        await new Promise((r) => setTimeout(r, 400));
+        s = await browser.tabs.sendMessage(tab.id, { type: 'dhan-status' });
+        if (!s.running) return s.result || { ok: false, error: 'no-result' };
+        showStatus("Keep this popup open. Dhan shows only company names, so the extension looks up each ticker in Dhan's search.", false, true);
+        UI.progress($('exProg'), $('exBar'), $('exProgText'), $('exProgCount'), { done: s.done, total: s.total, now: s.now || 'Reading the watchlist…' });
+        $('exStop').hidden = false;
+      }
+    } catch (e) {
+      showStatus(`Could not run on this page: ${e.message}`, true);
+      return null;
+    }
+  }
+
   async function read(target) {
-    showStatus('Reading the watchlist…');
+    showStatus('Reading the watchlist…', false, true);
     showDetails(null);
     const t = target || (await exportTarget());
     if (!t) return;
-    const res = t.site === 'kite' ? await readKite(t.tab) : await readTradingView(t.tab);
+    const readers = { kite: readKite, dhan: readDhan, tradingview: readTradingView };
+    const res = await readers[t.site](t.tab);
+    $('exStop').disabled = false;
     if (!res) return;
     if (!res.ok) {
-      if (res.error === 'list-empty') showStatus(`The watchlist ${res.listName || ''} has no symbols.`.replace('  ', ' '), true);
+      if (res.error === 'exception') showStatus(`Could not read the watchlist: ${res.message}`, true);
+      else if (res.error === 'list-empty') showStatus(`The watchlist ${res.listName || ''} has no symbols.`.replace('  ', ' '), true);
       else showStatus(MESSAGES[res.error] || `Could not read the watchlist (${res.error}).`, true);
       showDetails({ error: res.error, message: res.message, diag: res.diag });
       return;
@@ -210,8 +254,12 @@
       $('text').select();
       document.execCommand('copy');
     }
-    $('copy').textContent = 'Copied';
-    setTimeout(() => ($('copy').textContent = 'Copy'), 1500);
+    $('copy').textContent = 'Copied ✓';
+    $('copy').classList.add('done');
+    setTimeout(() => {
+      $('copy').textContent = 'Copy';
+      $('copy').classList.remove('done');
+    }, 2000);
   }
 
   function download() {
@@ -230,6 +278,15 @@
   $('copy').addEventListener('click', copy);
   $('download').addEventListener('click', download);
   $('again').addEventListener('click', () => read());
+  // Stop a Dhan read. The page script finishes the current lookup, then returns what it has.
+  $('exStop').addEventListener('click', async () => {
+    $('exStop').disabled = true;
+    try {
+      await browser.tabs.sendMessage((await activeTab()).id, { type: 'dhan-stop' });
+    } catch (e) {
+      // The read loop shows the error.
+    }
+  });
 
   // ---- Tabs ----------------------------------------------------------------------------------
   // The popup opens on Import on a Kite page, and on Export on other pages.

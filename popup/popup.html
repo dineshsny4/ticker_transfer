@@ -6,7 +6,7 @@
 </head>
 <body>
   <header>
-    <b>Ticker Transfer</b>
+    <div class="brand"><span class="logo">TT</span>Ticker Transfer</div>
     <div class="tabs" role="tablist">
       <button id="tabImport" role="tab">Import</button>
       <button id="tabExport" role="tab">Export</button>
@@ -15,35 +15,64 @@
 
   <main id="import" hidden>
     <p class="hint" id="imHint">Adds a list to the open watchlist.</p>
-    <div id="imPage" class="status">Checking this tab…</div>
-    <textarea id="imText" spellcheck="false" rows="6" placeholder="Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB"></textarea>
+    <div id="imPage" class="site"><span class="dot spin"></span><div class="txt">Checking this tab…</div></div>
+
+    <textarea id="imText" spellcheck="false" rows="4" placeholder="Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB"></textarea>
     <div class="cached" id="imFrom" hidden></div>
-    <div class="sum" id="imSum"></div>
+
+    <div class="stats" id="imSum" hidden></div>
     <div id="imGroups" class="groups"></div>
-    <ul id="imNotes" class="notes"></ul>
-    <div class="row">
-      <button id="imGo" class="go" disabled>Add to Kite</button>
-      <button id="imUseLast" class="plain" hidden>Use the last export</button>
+    <div id="imNotes" class="notes"></div>
+
+    <!-- Stays at the bottom of the popup when the popup scrolls. -->
+    <div class="actions">
+      <!-- Import progress: the import runs in the page; the popup reads its state. -->
+      <div id="imRun" class="run" hidden>
+        <div class="line"><b id="imRunTarget"></b><span id="imRunCount"></span></div>
+        <div class="bar"><i id="imRunBar"></i></div>
+        <div class="line"><span id="imRunNow"></span></div>
+        <div id="imRunTip" class="tip"></div>
+      </div>
+      <div id="imMsg" class="note" hidden></div>
+      <div id="imFail" class="fail" hidden></div>
+      <div class="row" id="imStartRow">
+        <button id="imGo" class="btn" disabled>Add to Kite</button>
+        <button id="imUseLast" class="btn ghost" hidden>Use the last export</button>
+      </div>
+      <div class="row" id="imRunRow" hidden>
+        <button id="imStop" class="btn ghost" hidden>Stop</button>
+        <button id="imContinue" class="btn" hidden>Continue import</button>
+        <button id="imExit" class="btn danger" hidden>Exit import</button>
+        <button id="imRetry" class="btn" hidden>Retry</button>
+        <button id="imCopyFail" class="btn ghost" hidden>Copy list</button>
+        <button id="imDone" class="btn done" hidden>Done</button>
+      </div>
     </div>
-    <div id="imMsg" class="status" hidden></div>
   </main>
 
   <main id="export" hidden>
-    <p class="hint">Copies the active watchlist on this tab (TradingView or Zerodha Kite).</p>
-    <div id="status" class="status">Reading the watchlist…</div>
+    <p class="hint">Copies the active watchlist on this tab (TradingView, Zerodha Kite or Dhan).</p>
+    <div id="status" class="site"><span class="dot spin"></span><div class="txt">Reading the watchlist…</div></div>
     <details id="details" hidden><summary>Details</summary><pre id="detailsText"></pre></details>
-    <div class="row"><button id="again" class="plain">Read again</button></div>
 
     <div id="result" hidden>
-      <div class="target" id="target"></div>
-      <div class="cached" id="cached" hidden></div>
-      <div class="sum" id="sum"></div>
-      <textarea id="text" readonly spellcheck="false" rows="7"></textarea>
-      <div class="row">
-        <button id="copy" class="go">Copy</button>
-        <button id="download" class="plain">Download .txt</button>
+      <div class="site"><span class="dot"></span><div><b id="target"></b><small id="cached">Active watchlist, read from the page</small></div></div>
+      <div class="stats" id="sum"></div>
+      <textarea id="text" readonly spellcheck="false" rows="5"></textarea>
+      <div id="notes" class="notes"></div>
+    </div>
+    <!-- Stays at the bottom of the popup when the popup scrolls. -->
+    <div class="actions">
+      <div id="exProg" class="prog" hidden>
+        <div class="bar"><i id="exBar"></i></div>
+        <div class="line"><span id="exProgText"></span><span id="exProgCount"></span></div>
       </div>
-      <ul id="notes" class="notes"></ul>
+      <div class="row">
+        <button id="copy" class="btn" hidden>Copy</button>
+        <button id="download" class="btn ghost" hidden>Download .txt</button>
+        <button id="exStop" class="btn ghost" hidden>Stop</button>
+        <button id="again" class="btn ghost">Read again</button>
+      </div>
     </div>
   </main>
 
@@ -52,6 +81,7 @@
   <script src="../shared/tvexport.js"></script>
   <script src="../content/tradingview-reader.js"></script>
   <script src="../content/tradingview-importer.js"></script>
+  <script src="ui.js"></script>
   <script src="import.js"></script>
   <script src="popup.js"></script>
 </body>

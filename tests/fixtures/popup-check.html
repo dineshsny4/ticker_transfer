@@ -1,0 +1,90 @@
+<!doctype html>
+<!-- Visual check of the popup with a fake browser API. Made from popup/popup.html. Open with ?site=kite|tv|dhan|none, &collapsed=1, &run=running|paused|done. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/popup/popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo">TT</span>Ticker Transfer</div>
+    <div class="tabs" role="tablist">
+      <button id="tabImport" role="tab">Import</button>
+      <button id="tabExport" role="tab">Export</button>
+    </div>
+  </header>
+
+  <main id="import" hidden>
+    <p class="hint" id="imHint">Adds a list to the open watchlist.</p>
+    <div id="imPage" class="site"><span class="dot spin"></span><div class="txt">Checking this tab…</div></div>
+
+    <textarea id="imText" spellcheck="false" rows="4" placeholder="Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB"></textarea>
+    <div class="cached" id="imFrom" hidden></div>
+
+    <div class="stats" id="imSum" hidden></div>
+    <div id="imGroups" class="groups"></div>
+    <div id="imNotes" class="notes"></div>
+
+    <!-- Stays at the bottom of the popup when the popup scrolls. -->
+    <div class="actions">
+      <!-- Import progress: the import runs in the page; the popup reads its state. -->
+      <div id="imRun" class="run" hidden>
+        <div class="line"><b id="imRunTarget"></b><span id="imRunCount"></span></div>
+        <div class="bar"><i id="imRunBar"></i></div>
+        <div class="line"><span id="imRunNow"></span></div>
+        <div id="imRunTip" class="tip"></div>
+      </div>
+      <div id="imMsg" class="note" hidden></div>
+      <div id="imFail" class="fail" hidden></div>
+      <div class="row" id="imStartRow">
+        <button id="imGo" class="btn" disabled>Add to Kite</button>
+        <button id="imUseLast" class="btn ghost" hidden>Use the last export</button>
+      </div>
+      <div class="row" id="imRunRow" hidden>
+        <button id="imStop" class="btn ghost" hidden>Stop</button>
+        <button id="imContinue" class="btn" hidden>Continue import</button>
+        <button id="imExit" class="btn danger" hidden>Exit import</button>
+        <button id="imRetry" class="btn" hidden>Retry</button>
+        <button id="imCopyFail" class="btn ghost" hidden>Copy list</button>
+        <button id="imDone" class="btn done" hidden>Done</button>
+      </div>
+    </div>
+  </main>
+
+  <main id="export" hidden>
+    <p class="hint">Copies the active watchlist on this tab (TradingView, Zerodha Kite or Dhan).</p>
+    <div id="status" class="site"><span class="dot spin"></span><div class="txt">Reading the watchlist…</div></div>
+    <details id="details" hidden><summary>Details</summary><pre id="detailsText"></pre></details>
+
+    <div id="result" hidden>
+      <div class="site"><span class="dot"></span><div><b id="target"></b><small id="cached">Active watchlist, read from the page</small></div></div>
+      <div class="stats" id="sum"></div>
+      <textarea id="text" readonly spellcheck="false" rows="5"></textarea>
+      <div id="notes" class="notes"></div>
+    </div>
+    <!-- Stays at the bottom of the popup when the popup scrolls. -->
+    <div class="actions">
+      <div id="exProg" class="prog" hidden>
+        <div class="bar"><i id="exBar"></i></div>
+        <div class="line"><span id="exProgText"></span><span id="exProgCount"></span></div>
+      </div>
+      <div class="row">
+        <button id="copy" class="btn" hidden>Copy</button>
+        <button id="download" class="btn ghost" hidden>Download .txt</button>
+        <button id="exStop" class="btn ghost" hidden>Stop</button>
+        <button id="again" class="btn ghost">Read again</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="/tests/fixtures/popup-stub.js"></script>
+  <script src="/shared/normalize.js"></script>
+  <script src="/shared/listformat.js"></script>
+  <script src="/shared/tvexport.js"></script>
+  <script src="/content/tradingview-reader.js"></script>
+  <script src="/content/tradingview-importer.js"></script>
+  <script src="/popup/ui.js"></script>
+  <script src="/popup/import.js"></script>
+  <script src="/popup/popup.js"></script>
+</body>
+</html>

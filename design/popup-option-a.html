@@ -1,0 +1,424 @@
+<title>Ticker Transfer Option A Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a short contents bar, then one band per area (Export, Import, Kite page panel, errors). Each band is a wrap grid of real-size popups with a caption and one line of notes. */
+:root {
+  --page: #f3f5f8;
+  --ink: #16202c;
+  --muted: #5d6877;
+  --rule: #d6dce4;
+  --display: "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --sys: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --p-bg: #ffffff;
+  --p-fg: #1b2330;
+  --p-muted: #667283;
+  --p-line: #dde2e9;
+  --p-soft: #f3f5f8;
+  --p-accent: #1f6feb;
+  --p-accent-soft: #e4eefd;
+  --p-good: #1a7f4b;
+  --p-good-soft: #e3f4ea;
+  --p-warn: #8a5b00;
+  --p-warn-soft: #fbf1d9;
+  --p-bad: #b8322a;
+  --p-bad-soft: #fbe6e4;
+  --p-shadow: 0 10px 30px rgba(22, 32, 44, .14), 0 1px 3px rgba(22, 32, 44, .1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #11151b; --ink: #e6eaf0; --muted: #98a3b2; --rule: #2a313b;
+    --p-bg: #1b2028; --p-fg: #e7ebf1; --p-muted: #9aa5b4; --p-line: #313946; --p-soft: #232a34;
+    --p-accent: #5a9bff; --p-accent-soft: #1f2f4a; --p-good: #4cc38a; --p-good-soft: #1b3428;
+    --p-warn: #e3b341; --p-warn-soft: #3a3020; --p-bad: #ff7b72; --p-bad-soft: #3b2224;
+    --p-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .04);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #11151b; --ink: #e6eaf0; --muted: #98a3b2; --rule: #2a313b;
+  --p-bg: #1b2028; --p-fg: #e7ebf1; --p-muted: #9aa5b4; --p-line: #313946; --p-soft: #232a34;
+  --p-accent: #5a9bff; --p-accent-soft: #1f2f4a; --p-good: #4cc38a; --p-good-soft: #1b3428;
+  --p-warn: #e3b341; --p-warn-soft: #3a3020; --p-bad: #ff7b72; --p-bad-soft: #3b2224;
+  --p-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .04);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 var(--display);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1260px; margin: 0 auto; }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; letter-spacing: -.01em; }
+.lede { color: var(--muted); max-width: 72ch; margin: 0; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.toc a { font: 500 13px var(--display); color: var(--ink); text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--ink); outline: none; }
+.toc a span { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 4px; }
+
+section.band { border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 24px; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+section.band > h2 { font-size: 22px; margin: 4px 0 4px; }
+section.band > p { margin: 0 0 20px; color: var(--muted); max-width: 72ch; font-size: 14px; }
+.grid { display: flex; flex-wrap: wrap; gap: 32px 28px; align-items: flex-start; }
+.shot { display: grid; gap: 8px; width: 380px; max-width: 100%; }
+.shot .cap { display: flex; gap: 8px; align-items: baseline; font: 500 12px var(--mono); color: var(--muted); }
+.shot .cap b { color: var(--ink); font-weight: 600; }
+.shot .desc { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* ---------- Popup (option A) ---------- */
+.pp { width: 380px; max-width: 100%; background: var(--p-bg); color: var(--p-fg); font: 13px/1.45 var(--sys); border-radius: 10px; box-shadow: var(--p-shadow); overflow: hidden; }
+.pp button { font: inherit; cursor: pointer; }
+.pp button:focus-visible { outline: 2px solid var(--p-accent); outline-offset: 2px; }
+.muted { color: var(--p-muted); }
+.head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid var(--p-line); }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.logo { width: 20px; height: 20px; border-radius: 5px; background: var(--p-accent); display: grid; place-items: center; color: #fff; font-size: 10.5px; letter-spacing: .02em; }
+.tabs { display: flex; background: var(--p-soft); border-radius: 8px; padding: 2px; }
+.tabs span { padding: 3px 12px; border-radius: 6px; color: var(--p-muted); }
+.tabs span.on { background: var(--p-bg); color: var(--p-fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+.body { padding: 12px 14px 14px; display: grid; gap: 10px; }
+.hint { margin: 0; color: var(--p-muted); font-size: 12.5px; }
+
+.site { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.site > div { min-width: 0; }
+.site b { display: block; }
+.site small { color: var(--p-muted); font-size: 12px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p-good); flex: none; }
+.dot.warn { background: var(--p-warn); }
+.dot.bad { background: var(--p-bad); }
+.dot.idle { background: var(--p-line); }
+.dot.spin { width: 14px; height: 14px; background: none; border: 2px solid var(--p-line); border-top-color: var(--p-accent); }
+@media (prefers-reduced-motion: no-preference) { .dot.spin { animation: spin .9s linear infinite; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.stats div { background: var(--p-soft); border-radius: 8px; padding: 7px 8px; }
+.stats b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 11px; color: var(--p-muted); }
+.stats .w b { color: var(--p-warn); }
+
+.text { background: var(--p-soft); border: 1px solid var(--p-line); border-radius: 8px; padding: 8px; font: 11.5px/1.4 ui-monospace, Consolas, monospace; word-break: break-all; color: var(--p-fg); max-height: 92px; overflow: hidden; }
+.paste { min-height: 96px; background: var(--p-bg); color: var(--p-muted); }
+.paste.filled { color: var(--p-fg); min-height: 0; }
+.from { font-size: 12px; color: var(--p-muted); margin-top: -4px; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row .btn { flex: 1 1 auto; text-align: center; white-space: nowrap; }
+.btn { border: 0; border-radius: 8px; padding: 7px 14px; background: var(--p-accent); color: #fff; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--p-fg); border: 1px solid var(--p-line); font-weight: 500; }
+.btn.wide { width: 100%; padding: 9px 14px; }
+.btn.off { background: var(--p-soft); color: var(--p-muted); cursor: default; }
+.btn.done { background: var(--p-good); }
+
+.note { font-size: 12px; border-radius: 6px; padding: 6px 8px; color: var(--p-warn); background: var(--p-warn-soft); }
+.note.info { color: var(--p-fg); background: var(--p-soft); }
+.note.bad { color: var(--p-bad); background: var(--p-bad-soft); }
+.note.good { color: var(--p-good); background: var(--p-good-soft); }
+.note b { font-weight: 600; }
+.notes { display: grid; gap: 6px; }
+
+.sel { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.grp { padding: 7px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.grp .top { display: flex; justify-content: space-between; gap: 8px; }
+.grp .new { color: var(--p-accent); font-size: 12px; white-space: nowrap; }
+.grp .reuse { color: var(--p-muted); font-size: 12px; white-space: nowrap; }
+.grp .skip { color: var(--p-bad); font-size: 12px; white-space: nowrap; }
+.grp .syms { margin-top: 2px; color: var(--p-muted); font: 11px/1.35 ui-monospace, Consolas, monospace; word-break: break-all; }
+.grp .syms s { opacity: .6; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.tog { width: 30px; height: 17px; border-radius: 9px; background: var(--p-accent); position: relative; flex: none; }
+.tog::after { content: ""; position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: #fff; }
+.tog.off { background: var(--p-line); }
+.tog.off::after { right: auto; left: 2px; }
+
+.prog { display: grid; gap: 6px; }
+.bar { height: 6px; border-radius: 3px; background: var(--p-soft); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--p-accent); }
+.prog .line { display: flex; justify-content: space-between; font-size: 12px; color: var(--p-muted); font-variant-numeric: tabular-nums; }
+.fail { border: 1px solid var(--p-line); border-radius: 8px; overflow: hidden; }
+.fail div { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; font-size: 12px; }
+.fail div + div { border-top: 1px solid var(--p-line); }
+.fail b { font-family: ui-monospace, Consolas, monospace; font-weight: 600; }
+.fail span { color: var(--p-muted); text-align: right; }
+.fail .h { background: var(--p-soft); font-weight: 600; }
+
+/* ---------- Kite page panel ---------- */
+.stage { width: 380px; max-width: 100%; height: 300px; border-radius: 10px; position: relative; overflow: hidden;
+  background: repeating-linear-gradient(0deg, var(--p-soft) 0 26px, var(--p-bg) 26px 27px); border: 1px solid var(--p-line); }
+.stage::before { content: "kite.zerodha.com"; position: absolute; top: 8px; left: 10px; font: 11px var(--mono); color: var(--p-muted); }
+.panel { position: absolute; right: 12px; bottom: 12px; width: 290px; background: var(--p-bg); color: var(--p-fg); font: 12.5px/1.45 var(--sys); border-radius: 10px; box-shadow: var(--p-shadow); padding: 12px; display: grid; gap: 8px; }
+.panel .t { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 600; }
+.panel .t .brand { font-size: 12px; }
+.panel .t .logo { width: 16px; height: 16px; font-size: 8.5px; border-radius: 4px; }
+.panel .row .btn { padding: 5px 12px; }
+
+/* ---------- New: list menu ---------- */
+.sel.open { border-color: var(--p-accent); box-shadow: 0 0 0 3px var(--p-accent-soft); }
+.sel .pick { color: var(--p-accent); }
+.menu { border: 1px solid var(--p-line); border-radius: 8px; overflow: hidden; margin-top: -6px; box-shadow: var(--p-shadow); }
+.menu div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 10px; }
+.menu div + div { border-top: 1px solid var(--p-line); }
+.menu div.on { background: var(--p-accent-soft); }
+.menu div.on b::before { content: "✓ "; color: var(--p-accent); }
+.menu div.hover { background: var(--p-soft); }
+.menu div.full span { color: var(--p-bad); }
+.menu span { color: var(--p-muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+.menu .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--p-muted); padding: 5px 10px; background: var(--p-soft); }
+
+/* ---------- New: file drop ---------- */
+.drop { border: 1.5px dashed var(--p-line); border-radius: 8px; padding: 14px 10px; text-align: center; display: grid; gap: 4px; justify-items: center; color: var(--p-muted); font-size: 12.5px; }
+.drop b { color: var(--p-fg); font-size: 13px; }
+.drop .ico { width: 28px; height: 28px; border-radius: 7px; background: var(--p-soft); display: grid; place-items: center; color: var(--p-accent); font-weight: 700; }
+.drop.over { border-color: var(--p-accent); background: var(--p-accent-soft); color: var(--p-accent); }
+.drop.over b { color: var(--p-accent); }
+.drop.bad { border-color: var(--p-bad); }
+.or { display: flex; align-items: center; gap: 8px; color: var(--p-muted); font-size: 11.5px; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--p-line); }
+.file { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.file .ico { width: 30px; height: 34px; border-radius: 4px; background: var(--p-accent-soft); color: var(--p-accent); display: grid; place-items: center; font: 600 9.5px ui-monospace, Consolas, monospace; flex: none; }
+.file > div { flex: 1; min-width: 0; }
+.file b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file small { color: var(--p-muted); font-size: 12px; }
+.file .x { color: var(--p-muted); border: 0; background: none; font-size: 16px; padding: 0 4px; }
+
+/* ---------- New: undo and retry ---------- */
+.btn.danger { background: var(--p-bad); }
+.btn.ghost.danger { background: transparent; color: var(--p-bad); border-color: var(--p-bad); }
+.newtag { font: 600 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--p-accent); background: var(--p-accent-soft); padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: 2px; }
+.toc a.new { border-color: var(--p-accent); }
+
+.foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 14px; max-width: 76ch; }
+.foot h3 { color: var(--ink); font-size: 16px; margin: 0 0 6px; }
+.foot ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+</style>
+
+<div class="wrap">
+  <h1>Ticker Transfer popup, option A</h1>
+  <p class="lede">Every screen of the extension, drawn in the "tabs and cards" style. Each popup is at real size (380 px). The texts are the real messages from <code>popup.js</code> and <code>import.js</code>; the lists are example data.</p>
+  <nav class="toc" id="toc" aria-label="Areas"></nav>
+  <div id="bands"></div>
+
+  <div class="foot">
+    <h3>New screens (the code does not have these yet)</h3>
+    <ul>
+      <li>List menu: the popup clicks only a list tab on the page. It uses the click guard, like every other click.</li>
+      <li>Undo and Retry: Undo removes only what this run added, and needs a second click. Retry runs only the failed symbols.</li>
+      <li>File import: .txt (TradingView or Chartink list) and .csv (Symbol column). The popup reads the file locally.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const H = (tab) => `<div class="head"><div class="brand"><span class="logo">TT</span>Ticker Transfer</div><div class="tabs"><span class="${tab === 'i' ? 'on' : ''}">Import</span><span class="${tab === 'e' ? 'on' : ''}">Export</span></div></div>`;
+const site = (dot, title, sub) => `<div class="site"><span class="dot ${dot}"></span><div><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</div></div>`;
+const stats = (items) => `<div class="stats">${items.map(([n, l, w]) => `<div class="${w ? 'w' : ''}"><b>${n}</b><span>${l}</span></div>`).join('')}</div>`;
+const text = (t, cls = '') => `<div class="text ${cls}">${t}</div>`;
+const note = (t, k = '') => `<div class="note ${k}">${t}</div>`;
+const notes = (...n) => `<div class="notes">${n.join('')}</div>`;
+const btns = (...b) => `<div class="row">${b.map(([l, k]) => `<button class="btn ${k || ''}">${l}</button>`).join('')}</div>`;
+const sel = (l, v) => `<div class="sel"><span class="muted">${l}</span><b>${v}</b></div>`;
+const grp = (name, n, dest, kind, syms) => `<div class="grp"><div class="top"><span>${name} <span class="muted">${n}</span></span><span class="${kind}">${dest}</span></div>${syms ? `<div class="syms">${syms}</div>` : ''}</div>`;
+const sw = (l, on = true) => `<div class="switch"><span>${l}</span><span class="tog ${on ? '' : 'off'}"></span></div>`;
+const prog = (pct, left, right) => `<div class="prog"><div class="bar"><i style="width:${pct}%"></i></div><div class="line"><span>${left}</span><span>${right}</span></div></div>`;
+const fail = (rows) => `<div class="fail"><div class="h"><span style="color:inherit">Not added:</span><span></span></div>${rows.map(([s, r]) => `<div><b>${s}</b><span>${r}</span></div>`).join('')}</div>`;
+const hint = (t) => `<p class="hint">${t}</p>`;
+const pop = (tab, ...parts) => `<div class="pp">${H(tab)}<div class="body">${parts.join('')}</div></div>`;
+const selOpen = (l, name, count) => `<div class="sel open"><span class="muted">${l}</span><b class="pick">${name} ▴ <span class="muted">${count}</span></b></div>`;
+const menu = (rows) => `<div class="menu"><div class="lbl">Lists on this page</div>${rows.map(([n, c, k]) => `<div class="${k || ''}"><b>${n}</b><span>${c}</span></div>`).join('')}</div>`;
+const drop = (k) => `<div class="drop ${k}"><span class="ico">${k === 'bad' ? '!' : '↓'}</span><b>${k === 'over' ? 'Drop to read the file' : 'Drop a .txt or .csv file here'}</b><span>${k === 'over' ? 'swing-setups.txt' : 'or <u>Choose file…</u>'}</span></div>`;
+const file = (ext, name, sub) => `<div class="file"><span class="ico">${ext}</span><div><b>${name}</b><small>${sub}</small></div><button class="x" aria-label="Clear file">×</button></div>`;
+const kpanel = (inner, title, h) => `<div class="stage" style="height:${h || 300}px"><div class="panel"><div class="t"><span class="brand"><span class="logo">TT</span>${title}</span></div>${inner}</div></div>`;
+
+const TV_TEXT = '###VR1 first move,NSE:KROSS,NSE:PNB,NSE:PLATIND,NSE:M_M,NSE:BAJAJ_AUTO,NSE:LUMAXTECH,NSE:TATAPOWER,NSE:IRFC,###VR2 pullback,NSE:IXIGO,NSE:DEEPAKFERT,NSE:HAL,NSE:BEL,NSE:CDSL';
+const EX_HINT = hint('Copies the active watchlist on this tab (TradingView, Zerodha Kite or Dhan).');
+const IM_HINT_KITE = hint('Adds a list to the open Zerodha Kite watchlist.');
+const IM_HINT_TV = hint('Adds a list to the open TradingView watchlist, with its sections.');
+const IM_HINT_DHAN = hint('Adds a list to the open Dhan watchlist, with its sections.');
+const FROM = '<div class="from">From the TradingView list Swing setups, read on 29 Oct, 10:42.</div>';
+const PASTED = text(TV_TEXT, 'paste filled');
+
+const BANDS = [
+  {
+    id: 'export', eyebrow: 'Tab 1', title: 'Export',
+    intro: 'The popup reads the active watchlist on the open tab and keeps it for Import. It opens on the Export tab when the tab is a source site.',
+    shots: [
+      { cap: 'Reading', site: 'any site', desc: 'Shows while the content script reads the list. Usually under one second.',
+        html: pop('e', EX_HINT, site('spin', 'Reading the watchlist…', 'TradingView · tradingview.com/chart')) },
+      { cap: 'Result', site: 'TradingView', desc: 'Sections become ###NAME. Copy puts the text on the clipboard. The list is also kept for Import.',
+        html: pop('e', site('', 'TradingView · Swing setups', 'Active watchlist, read from the page'), stats([[13, 'symbols'], [2, 'sections'], [1, 'left out', 1]]), text(TV_TEXT), notes(note('Not NSE, left out (1): BSE:533282.')), btns(['Copy'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+      { cap: 'Result after Copy', site: 'TradingView', desc: 'The Copy button confirms for two seconds, then goes back.',
+        html: pop('e', site('', 'TradingView · Swing setups', 'Active watchlist, read from the page'), stats([[13, 'symbols'], [2, 'sections'], [0, 'left out']]), text(TV_TEXT), btns(['Copied ✓', 'done'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+      { cap: 'Result, read before', site: 'TradingView', desc: 'When the popup opens again on the same list, it shows the kept copy and says when it was read.',
+        html: pop('e', site('idle', 'TradingView · Swing setups', 'Read before, on 29 Oct, 10:42. If the list changed, click Read again.'), stats([[13, 'symbols'], [2, 'sections'], [0, 'left out']]), text(TV_TEXT), btns(['Copy'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+      { cap: 'Result with collapsed section', site: 'TradingView', desc: 'A collapsed section exports as its header only. The note asks the user to expand it.',
+        html: pop('e', site('', 'TradingView · Swing setups', 'Active watchlist, read from the page'), stats([[8, 'symbols'], [2, 'sections'], [0, 'left out']]), text('###VR1 first move,NSE:KROSS,NSE:PNB,NSE:PLATIND,NSE:M_M,NSE:BAJAJ_AUTO,NSE:LUMAXTECH,NSE:TATAPOWER,NSE:IRFC,###VR2 pullback'), notes(note('<b>Collapsed: VR2 pullback.</b> The symbols in a collapsed section or group are not read. Expand it and click Read again to include them.')), btns(['Copy'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+      { cap: 'Result', site: 'Zerodha Kite', desc: 'Kite groups become sections. The default part of the list has no header.',
+        html: pop('e', site('', 'Zerodha Kite · list Swing', '40 / 250 · 2 groups'), stats([[40, 'symbols'], [2, 'groups'], [0, 'left out']]), text('NSE:INFY,NSE:TCS,NSE:HDFCBANK,NSE:M_M,###Breakout,NSE:KROSS,NSE:PNB,NSE:IRFC,###Pullback,NSE:HAL,NSE:BEL,NSE:CDSL,…'), btns(['Copy'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+      { cap: 'Looking up tickers', site: 'Dhan', desc: 'Dhan shows company names only. The extension searches each one, about one second each.',
+        html: pop('e', EX_HINT, site('spin', 'Dhan · list Weekly', 'Looking up LUMAX AUTO TECHNOLOGIES… 7 / 18'), prog(39, 'Looking up 7 of 18', 'about 11 s left'), notes(note('Keep this popup open. Dhan shows only company names, so the extension looks up each ticker in Dhan\'s search.', 'info')), btns(['Stop', 'ghost'])) },
+      { cap: 'Result', site: 'Dhan', desc: 'Same result card. Non-NSE rows are named and left out.',
+        html: pop('e', site('', 'Dhan · list Weekly', 'Active watchlist, read from the page'), stats([[17, 'symbols'], [2, 'sections'], [1, 'left out', 1]]), text('###WEEKLY,NSE:KROSS,NSE:LUMAXTECH,NSE:PNB,NSE:IRFC,NSE:SUZLON,###WATCH,NSE:HAL,NSE:BEL,…'), notes(note('Not NSE, left out (1): BSE:ATLASCYCLE.')), btns(['Copy'], ['Download .txt', 'ghost'], ['Read again', 'ghost'])) },
+    ],
+  },
+  {
+    id: 'import', eyebrow: 'Tab 2', title: 'Import',
+    intro: 'The user pastes a list or uses the last export. The popup shows a preview of what will happen, then one button adds the list. It opens on the Import tab when the tab is a target site and a list is kept.',
+    shots: [
+      { cap: 'Empty', site: 'Zerodha Kite', desc: 'No kept list yet. The Add button stays off until the box has symbols.',
+        html: pop('i', IM_HINT_KITE, site('', 'Zerodha Kite · list Swing (40 / 250)'), text('Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB', 'paste'), btns(['Add to Kite', 'off wide'])) },
+      { cap: 'Kept list offered', site: 'Zerodha Kite', desc: 'A list from the last export is ready. One click fills the box.',
+        html: pop('i', IM_HINT_KITE, site('', 'Zerodha Kite · list Swing (40 / 250)'), text('Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB', 'paste'), btns(['Add to Kite', 'off'], ['Use the last export (TradingView, 13)', 'ghost'])) },
+      { cap: 'Preview', site: 'Zerodha Kite', desc: 'Each section shows where it goes. Symbols already in the list are struck out. Names are converted (M_M → M&M).',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), PASTED, FROM, stats([[11, 'to add'], [2, 'already in'], [51, 'after, of 250']]), grp('VR1 first move', 8, '→ new group', 'new', 'KROSS, <s>PNB</s>, PLATIND, M&amp;M, BAJAJ-AUTO, LUMAXTECH, <s>TATAPOWER</s>, IRFC'), grp('VR2 pullback', 5, '→ existing group', 'reuse', 'IXIGO, DEEPAKFERT, HAL, BEL, CDSL'), sw('Put each section into its own group'), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Preview, flat list', site: 'Zerodha Kite', desc: 'With the switch off, all symbols go to the default part of the list.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), PASTED, FROM, stats([[11, 'to add'], [2, 'already in'], [51, 'after, of 250']]), grp('Default part of the list', 13, '→ default', 'reuse', 'KROSS, <s>PNB</s>, PLATIND, M&amp;M, BAJAJ-AUTO, LUMAXTECH, <s>TATAPOWER</s>, IRFC, IXIGO, DEEPAKFERT, HAL, BEL, CDSL'), sw('Put each section into its own group', false), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Preview with warnings', site: 'Zerodha Kite', desc: 'All preview notes in one place: list nearly full, a group selected, items left out.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (246 / 250)'), PASTED, stats([[4, 'can add', 1], [2, 'already in'], [250, 'after, of 250']]), grp('No section', 3, 'not added', 'skip'), grp('VR1 first move', 8, '→ new group', 'new'), notes(
+          note('The list has room for 4 more (250 maximum). The first 4 are added. The rest are listed as not added.'),
+          note('Kite has the group "Pullback" selected. The symbols with no section would go into that group, so they will not be added.'),
+          note('Not NSE, left out (1): BSE:533282.'),
+          note('Not a stock symbol, left out (2): NIFTY, BANKNIFTY.')), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Started', site: 'Zerodha Kite', desc: 'Kite runs on the page. The user can close the popup. The panel on the page shows the rest.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), stats([[11, 'to add'], [2, 'already in'], [51, 'after, of 250']]), btns(['Started', 'off wide']), note('Started. The panel at the lower right of the Kite page shows the progress. You can close this popup.', 'good')) },
+      { cap: 'Preview', site: 'TradingView', desc: 'TradingView takes the whole list in one step, with its sections.',
+        html: pop('i', IM_HINT_TV, site('', 'TradingView · list Swing setups'), text('###BREAKOUT,NSE:KROSS,NSE:PNB,NSE:PLATIND,###RETEST,NSE:HAL,NSE:BEL', 'paste filled'), '<div class="from">From the Zerodha Kite list Swing, read on 29 Oct, 11:05.</div>', stats([[5, 'symbols'], [2, 'sections'], [0, 'left out']]), notes(
+          note('TradingView adds the whole list in one step. It does not add a symbol that is already in the list.', 'info'),
+          note('If a section name is already in the list, TradingView does not make it again. Its new symbols can go to the end of the list.', 'info')), btns(['Add to TradingView', 'wide'])) },
+      { cap: 'Done', site: 'TradingView', desc: 'The popup waits for TradingView, then confirms.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), stats([[5, 'symbols'], [2, 'sections'], [0, 'left out']]), btns(['Add to TradingView', 'off wide']), note('Done. TradingView took the list into "Swing setups". Check the list in the Watchlist panel.', 'good')) },
+      { cap: 'Preview', site: 'Dhan', desc: 'Dhan looks up each symbol first. The popup must stay open.',
+        html: pop('i', IM_HINT_DHAN, site('', 'Dhan · list Weekly'), PASTED, FROM, stats([[13, 'symbols'], [2, 'sections'], [0, 'left out']]), notes(
+          note('The extension looks up each symbol in Dhan\'s search (about one second each) and picks the NSE listing (SYMBOL-EQ). Then it adds the whole list in one step.', 'info'),
+          note('Keep this popup open until the import is done.')), btns(['Add to Dhan', 'wide'])) },
+      { cap: 'Running', site: 'Dhan', desc: 'Progress stays in the popup, because Dhan has no page panel.',
+        html: pop('i', site('spin', 'Dhan · list Weekly', 'Looking up PLATIND… 6 / 13'), prog(46, 'Looking up 6 of 13', '5 found · 1 not found'), note('Keep this popup open until the import is done.'), btns(['Stop', 'ghost'])) },
+      { cap: 'Done with failures', site: 'Dhan', desc: 'Added count, then each symbol that failed, with its reason.',
+        html: pop('i', site('', 'Dhan · list Weekly'), stats([[11, 'added'], [2, 'not added', 1], [2, 'sections']]), note('Done. Dhan took 11 symbols into "Weekly". Check the list in the Watchlist panel.', 'good'), fail([['PLATIND', 'only listed on BSE'], ['DEEPAKFERT', 'not found in Dhan\'s search']])) },
+    ],
+  },
+  {
+    id: 'panel', eyebrow: 'On the page', title: 'Kite progress panel',
+    intro: 'Kite adds one symbol at a time, so a panel at the lower right of the Kite page shows the progress. It stays when the popup closes. Same cards and colours as the popup.',
+    shots: [
+      { cap: 'Running', site: 'Zerodha Kite', desc: 'Stop finishes the current symbol, then stops.',
+        html: `<div class="stage"><div class="panel"><div class="t"><span class="brand"><span class="logo">TT</span>Kite · list Swing (47 / 250)</span></div>${prog(62, '7 / 11 · 7 added', '')}<div class="muted">VR1 first move → adding LUMAXTECH…</div><div class="row"><button class="btn ghost">Stop</button></div></div></div>` },
+      { cap: 'Stopping', site: 'Zerodha Kite', desc: 'After a click on Stop.',
+        html: `<div class="stage"><div class="panel"><div class="t"><span class="brand"><span class="logo">TT</span>Kite · list Swing (48 / 250)</span></div>${prog(73, '8 / 11 · 8 added', '')}<div class="muted">VR2 pullback → adding IXIGO…</div><div class="row"><button class="btn off">Stopping…</button></div></div></div>` },
+      { cap: 'All done, with failures', site: 'Zerodha Kite', desc: 'One line for each failed symbol, with the reason from Kite.',
+        html: `<div class="stage" style="height:340px"><div class="panel"><div class="t"><span class="brand"><span class="logo">TT</span>Kite · list Swing (49 / 250)</span></div>${prog(100, '11 / 11 · 9 added · 2 not added', '')}${note('All done.', 'good')}${fail([['PLATIND', 'only listed on BSE in Kite'], ['DEEPAKFERT', 'Kite\'s search did not find it on NSE']])}<div class="row"><button class="btn ghost">Copy list</button><button class="btn">Done</button></div></div></div>` },
+      { cap: 'Stopped', site: 'Zerodha Kite', desc: 'The symbols added before the stop stay in the list.',
+        html: `<div class="stage"><div class="panel"><div class="t"><span class="brand"><span class="logo">TT</span>Kite · list Swing (48 / 250)</span></div>${prog(73, '8 / 11 · 8 added', '')}${note('Stopped. Everything added so far stays.', 'info')}<div class="row"><button class="btn">Done</button></div></div></div>` },
+    ],
+  },
+  {
+    id: 'lists', fresh: true, eyebrow: 'New · list menu', title: 'Switch the list from the popup',
+    intro: 'The target row opens a menu of the lists on the page. A click on a list makes the extension click that list\'s tab on the page, then the preview counts again. The Export tab has the same menu to pick the list to read.',
+    shots: [
+      { cap: 'Menu open', site: 'Zerodha Kite', desc: 'Kite has 7 lists. Each shows its count. A full list cannot take symbols.',
+        html: pop('i', site('', 'Zerodha Kite'), selOpen('Into list', 'Swing', '40 / 250'), menu([['1 · Swing', '40 / 250', 'on'], ['2 · Positional', '112 / 250', 'hover'], ['3 · Intraday', '250 / 250 full', 'full'], ['4 · Long term', '18 / 250'], ['5 · Watch', '0 / 250'], ['6 · F&amp;O', '31 / 250'], ['7 · 7', '0 / 250']]), grp('VR1 first move', 8, '→ new group', 'new'), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Switching', site: 'Zerodha Kite', desc: 'The extension clicks the list tab on the Kite page. It never clicks anything else.',
+        html: pop('i', site('spin', 'Switching to list Positional…', 'The extension clicks the list tab on the Kite page.'), sel('Into list', 'Positional ▾'), btns(['Add to Kite', 'off wide'])) },
+      { cap: 'Preview after the switch', site: 'Zerodha Kite', desc: 'The preview counts again for the new list.',
+        html: pop('i', site('', 'Zerodha Kite · list Positional (112 / 250)'), sel('Into list', 'Positional ▾ <span class="muted">112 / 250</span>'), stats([[9, 'to add'], [4, 'already in'], [121, 'after, of 250']]), grp('VR1 first move', 8, '→ existing group', 'reuse', 'KROSS, <s>PNB</s>, PLATIND, <s>M&amp;M</s>, BAJAJ-AUTO, <s>LUMAXTECH</s>, TATAPOWER, <s>IRFC</s>'), grp('VR2 pullback', 5, '→ new group', 'new'), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Full list picked', site: 'Zerodha Kite', desc: 'The Add button stays off. The note tells the user to pick another list.',
+        html: pop('i', site('', 'Zerodha Kite · list Intraday (250 / 250)'), sel('Into list', 'Intraday ▾ <span class="muted">250 / 250</span>'), stats([[0, 'can add', 1], [0, 'already in'], [250, 'after, of 250']]), note('Intraday is full (250 maximum). Pick another list, or remove symbols on Kite first.', 'bad'), btns(['Add to Kite', 'off wide'])) },
+      { cap: 'Menu open', site: 'TradingView', desc: 'TradingView can also make a new list for the import.',
+        html: pop('i', site('', 'TradingView'), selOpen('Into list', 'Swing setups', '62 / 1000'), menu([['Swing setups', '62 / 1000', 'on'], ['Ideas', '9 / 1000'], ['Breakouts', '140 / 1000', 'hover'], ['＋ New watchlist from this import', '']]), btns(['Add to TradingView', 'wide'])) },
+      { cap: 'Menu open', site: 'Dhan', desc: 'Same menu for Dhan lists.',
+        html: pop('i', site('', 'Dhan'), selOpen('Into list', 'Weekly', '18 / 250'), menu([['Weekly', '18 / 250', 'on'], ['Monthly', '44 / 250'], ['Momentum', '7 / 250', 'hover']]), btns(['Add to Dhan', 'wide'])) },
+      { cap: 'Pick the list to read', site: 'TradingView', desc: 'On the Export tab the menu switches the list on the page, then reads it.',
+        html: pop('e', site('', 'TradingView · Swing setups', 'Active watchlist, read from the page'), selOpen('Read list', 'Swing setups', '62'), menu([['Swing setups', '62', 'on'], ['Ideas', '9', 'hover'], ['Breakouts', '140']]), stats([[62, 'symbols'], [4, 'sections'], [0, 'left out']]), btns(['Copy'], ['Download .txt', 'ghost'])) },
+    ],
+  },
+  {
+    id: 'undo', fresh: true, eyebrow: 'New · undo and retry', title: 'Undo and Retry on every site',
+    intro: 'After a run, Retry adds the failed symbols again, and Undo removes only what this run added: its symbols, and the groups or sections it made. Undo needs a second click to confirm. Kite shows these in the page panel; TradingView and Dhan show them in the popup.',
+    shots: [
+      { cap: 'Done, with failures', site: 'Zerodha Kite', desc: 'Retry these and Undo sit under the list of failures.',
+        html: kpanel(`${prog(100, '11 / 11 · 9 added · 2 not added', '')}${note('All done.', 'good')}${fail([['PLATIND', 'only listed on BSE in Kite'], ['DEEPAKFERT', 'Kite\'s search did not find it on NSE']])}${btns(['Retry these (2)'], ['Undo (remove 9)', 'ghost'])}${btns(['Copy list', 'ghost'], ['Done', 'ghost'])}`, 'Kite · list Swing (49 / 250)', 400) },
+      { cap: 'Undo, confirm', site: 'Zerodha Kite', desc: 'The second click confirms. The panel names what Undo removes.',
+        html: kpanel(`${note('Undo removes the 9 symbols and the group "VR1 first move" that this run added. Symbols that were there before stay.', 'info')}${btns(['Yes, remove 9', 'danger'], ['Cancel', 'ghost'])}`, 'Kite · list Swing (49 / 250)') },
+      { cap: 'Undo running', site: 'Zerodha Kite', desc: 'Undo uses the same click guard: only the remove icon of a symbol this run added.',
+        html: kpanel(`${prog(44, 'Removing 4 / 9', '')}<div class="muted">VR1 first move → removing PLATIND…</div>${btns(['Stop', 'ghost'])}`, 'Kite · list Swing (45 / 250)') },
+      { cap: 'Undo done', site: 'Zerodha Kite', desc: 'The list is back as it was before the run.',
+        html: kpanel(`${note('9 removed · 1 group deleted.', 'good')}${btns(['Copy backup', 'ghost'], ['Done'])}`, 'Kite · list Swing (40 / 250)') },
+      { cap: 'Retry running', site: 'Zerodha Kite', desc: 'Retry runs only the failed symbols, with the same panel.',
+        html: kpanel(`${prog(50, 'Retry · 1 / 2 · 0 added', '')}<div class="muted">VR1 first move → adding PLATIND…</div>${btns(['Stop', 'ghost'])}`, 'Kite · list Swing (49 / 250)') },
+      { cap: 'Done', site: 'TradingView', desc: 'TradingView shows new symbols only after a reload. Undo removes the symbols and sections of this run.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), stats([[5, 'added'], [2, 'sections'], [0, 'not added']]), note('Done. TradingView took the list into "Swing setups". Check the list in the Watchlist panel.', 'good'), btns(['Reload TradingView'], ['Undo (remove 5)', 'ghost'])) },
+      { cap: 'Not accepted, retry', site: 'TradingView', desc: 'When TradingView does not take the list, Retry tries the same list again.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), stats([[5, 'symbols'], [2, 'sections'], [0, 'left out']]), note('TradingView did not take the list. The "Add symbol" dialog is still open. Press Enter in it, or close it.', 'bad'), btns(['Retry'], ['Copy list', 'ghost'])) },
+      { cap: 'Undo, confirm', site: 'TradingView', desc: 'Confirm in the popup.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), note('Undo removes the 5 symbols and the sections BREAKOUT and RETEST that this run added.', 'info'), btns(['Yes, remove 5', 'danger'], ['Cancel', 'ghost'])) },
+      { cap: 'Done, with failures', site: 'Dhan', desc: 'Retry these and Undo below the failures.',
+        html: pop('i', site('', 'Dhan · list Weekly'), stats([[11, 'added'], [2, 'not added', 1], [2, 'sections']]), note('Done. Dhan took 11 symbols into "Weekly". Check the list in the Watchlist panel.', 'good'), fail([['PLATIND', 'only listed on BSE'], ['DEEPAKFERT', 'not found in Dhan\'s search']]), btns(['Retry these (2)'], ['Undo (remove 11)', 'ghost'], ['Copy list', 'ghost'])) },
+      { cap: 'Retry result', site: 'Dhan', desc: 'The list of failures gets shorter. Retry stays for the rest.',
+        html: pop('i', site('', 'Dhan · list Weekly'), stats([[12, 'added'], [1, 'not added', 1], [2, 'sections']]), note('Retry: 1 added, 1 still not added.', 'info'), fail([['PLATIND', 'only listed on BSE']]), btns(['Retry these (1)'], ['Undo (remove 12)', 'ghost'])) },
+      { cap: 'Undo done', site: 'Dhan', desc: 'Empty sections that this run made are deleted too.',
+        html: pop('i', site('', 'Dhan · list Weekly'), note('12 removed · 1 empty section deleted.', 'good'), btns(['Copy backup', 'ghost'], ['Done'])) },
+    ],
+  },
+  {
+    id: 'file', fresh: true, eyebrow: 'New · file import', title: 'Import from a file',
+    intro: 'The Import tab takes a .txt or .csv file: drop it on the box, or click Choose file. The popup reads the file on the computer. Nothing is sent anywhere. It reads a TradingView list, a Chartink list, or a CSV with a Symbol column.',
+    shots: [
+      { cap: 'Empty, with file drop', site: 'Zerodha Kite', desc: 'Three ways in: paste text, drop a file, or use the last export.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), text('Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB', 'paste'), '<div class="or">or use a file</div>', drop(''), btns(['Add to Kite', 'off'], ['Use the last export (TradingView, 13)', 'ghost'])) },
+      { cap: 'File over the box', site: 'Zerodha Kite', desc: 'The box lights up while the user drags a file over it.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), text('Paste a TradingView list here, for example ###WEEKLY,NSE:KROSS,NSE:PNB', 'paste'), '<div class="or">or use a file</div>', drop('over'), btns(['Add to Kite', 'off'])) },
+      { cap: 'TradingView .txt loaded', site: 'Zerodha Kite', desc: 'The file row replaces the drop box. × clears it. The preview is the same as for a paste.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), file('TXT', 'swing-setups.txt', 'TradingView list · 13 symbols · 2 sections'), stats([[11, 'to add'], [2, 'already in'], [51, 'after, of 250']]), grp('VR1 first move', 8, '→ new group', 'new'), grp('VR2 pullback', 5, '→ existing group', 'reuse'), sw('Put each section into its own group'), btns(['Add to Kite', 'wide'])) },
+      { cap: 'CSV loaded', site: 'Zerodha Kite', desc: 'The popup reads the Symbol column and names the rows it left out.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), file('CSV', 'screener-results.csv', 'CSV · Symbol column · 48 rows'), stats([[44, 'to add'], [2, 'already in'], [84, 'after, of 250']]), grp('No section', 46, '→ default', 'reuse'), notes(note('2 rows have no symbol. They are left out (rows 17, 31).')), btns(['Add to Kite', 'wide'])) },
+      { cap: 'Chartink list loaded', site: 'TradingView', desc: 'A plain list with no sections and no NSE: prefix.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), file('TXT', 'chartink-vcp-scan.txt', 'Chartink list · 22 symbols · no sections'), stats([[22, 'symbols'], [0, 'sections'], [0, 'left out']]), notes(note('This file has no sections. All symbols go to the end of the list.', 'info')), btns(['Add to TradingView', 'wide'])) },
+      { cap: 'Wrong file type', site: 'any target', desc: 'Only .txt and .csv files. The error says what to use.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), drop('bad'), note('The popup cannot read portfolio.xlsx. Save it as .csv or .txt, then drop it again.', 'bad'), btns(['Add to Kite', 'off wide'])) },
+      { cap: 'CSV without a Symbol column', site: 'any target', desc: 'The CSV must have a column named Symbol.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (40 / 250)'), file('CSV', 'holdings-oct.csv', 'CSV · 3 columns: Name, Qty, Price'), note('This CSV has no Symbol column. Name the column with the tickers "Symbol", or paste the list.', 'bad'), btns(['Add to Kite', 'off wide'])) },
+    ],
+  },
+  {
+    id: 'errors', eyebrow: 'When it cannot run', title: 'Errors and blocked states',
+    intro: 'Each error says what is wrong and what the user must do. The popup never opens a panel for the user.',
+    shots: [
+      { cap: 'Wrong site', site: 'any other tab', desc: 'Both tabs show this when the tab is not a known site.',
+        html: pop('e', EX_HINT, site('bad', 'This tab is not a watchlist site', 'Open a TradingView chart, Zerodha Kite or Dhan (tv.dhan.co) in this tab, then click the icon again.')) },
+      { cap: 'Panel closed', site: 'TradingView', desc: 'The watchlist panel on the right is hidden.',
+        html: pop('e', EX_HINT, site('warn', 'Watchlist panel is closed', 'Open the Watchlist panel on the right side of the chart, then click Read again.'), btns(['Read again', 'ghost'])) },
+      { cap: 'Watchlist hidden', site: 'Zerodha Kite', desc: 'Kite hides the watchlist in a narrow window.',
+        html: pop('e', EX_HINT, site('warn', 'Kite watchlist is not on the screen', 'Show it on the left (make the window wider if it is hidden), then click Read again.'), btns(['Read again', 'ghost'])) },
+      { cap: 'Chart not loaded', site: 'Dhan', desc: 'The chart frame is not ready yet.',
+        html: pop('e', EX_HINT, site('warn', 'The Dhan chart is not loaded yet', 'Wait for the chart, then click Read again.'), btns(['Read again', 'ghost'])) },
+      { cap: 'Empty list', site: 'TradingView', desc: 'The list has no symbols, or none on NSE.',
+        html: pop('e', EX_HINT, site('warn', 'Nothing to export', 'The watchlist Ideas has no symbols.'), notes(note('The watchlist has no NSE symbols to export.', 'bad')), btns(['Read again', 'ghost'])) },
+      { cap: 'Import already running', site: 'Zerodha Kite', desc: 'A second import on the same page is blocked.',
+        html: pop('i', site('', 'Zerodha Kite · list Swing (44 / 250)'), PASTED, notes(note('An import is running on this page now. Wait for it to finish.', 'bad')), btns(['Add to Kite', 'off wide'])) },
+      { cap: 'Not accepted', site: 'TradingView or Dhan', desc: 'The site did not take the pasted list.',
+        html: pop('i', site('', 'TradingView · list Swing setups'), stats([[5, 'symbols'], [2, 'sections'], [0, 'left out']]), btns(['Add to TradingView', 'wide']), note('TradingView did not take the list. The "Add symbol" dialog is still open. Press Enter in it, or close it.', 'bad')) },
+      { cap: 'Script error', site: 'any site', desc: 'The fallback for an error with no special text.',
+        html: pop('e', EX_HINT, site('bad', 'Could not run on this page', 'Missing host permission for the tab.'), notes(note('The read did not finish. Reload the TradingView tab and try again.', 'bad')), btns(['Read again', 'ghost'])) },
+    ],
+  },
+];
+
+document.getElementById('toc').innerHTML = BANDS.map((b) => `<a href="#${b.id}" class="${b.fresh ? 'new' : ''}">${b.fresh ? b.eyebrow.replace('New · ', '') : b.title}<span>${b.shots.length}</span></a>`).join('');
+document.getElementById('bands').innerHTML = BANDS.map((b) => `
+  <section class="band" id="${b.id}">
+    <div class="eyebrow">${b.eyebrow}</div>
+    <h2>${b.title}${b.fresh ? '<span class="newtag">New</span>' : ''}</h2>
+    <p>${b.intro}</p>
+    <div class="grid">${b.shots.map((s) => `
+      <div class="shot">
+        <div class="cap"><b>${s.cap}</b><span>· ${s.site}</span></div>
+        ${s.html}
+        <p class="desc">${s.desc}</p>
+      </div>`).join('')}
+    </div>
+  </section>`).join('');
+</script>

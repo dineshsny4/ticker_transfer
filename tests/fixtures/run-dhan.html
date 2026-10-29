@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Dhan test runner</title></head>
+<body>
+<!-- Loads a fake tv.dhan.co page (the chart in iframe "Financial Chart"), injects content/dhan.js
+     into the outer page with a fake browser.runtime, runs ?mode=export or ?mode=import
+     (&sections=JSON), and writes the end state into #out. -->
+<iframe id="f" style="width:1000px;height:600px"></iframe>
+<pre id="out">PENDING</pre>
+<script>
+  const params = new URLSearchParams(location.search);
+  const f = document.getElementById('f');
+  f.srcdoc = `<div id="tv_chart_container"><iframe title="Financial Chart" style="width:900px;height:500px" src="${new URL('dhan-frame.html', location.href)}${params.get('list') ? `?list=${encodeURIComponent(params.get('list'))}` : ''}"></iframe></div>`;
+  f.onload = async () => {
+    const w = f.contentWindow;
+    const inner = w.document.querySelector('iframe').contentWindow;
+    for (let i = 0; i < 50 && !(inner.document && inner.document.querySelector('[data-name="watchlists-button"]')); i++) await new Promise((r) => setTimeout(r, 100));
+    w.browser = { runtime: { onMessage: { addListener: (fn) => { w.__listener = fn; } } } };
+    w.eval(await (await fetch('../../shared/normalize.js')).text());
+    w.eval(await (await fetch('../../content/dhan.js')).text());
+    const send = (m) => w.__listener(m);
+    const info = await send({ type: 'dhan-info' });
+    const kind = params.get('mode') || 'export';
+    const start = kind === 'export' ? await send({ type: 'dhan-export' }) : await send({ type: 'dhan-import', sections: JSON.parse(params.get('sections') || '[]') });
+    let s;
+    for (let i = 0; i < 600; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+      s = await send({ type: 'dhan-status' });
+      if (!s.running) break;
+    }
+    const dialogOpen = !!inner.document.querySelector('[data-name="watchlist-symbol-search-dialog"]');
+    document.getElementById('out').textContent = JSON.stringify({ info, start, result: s.result, clicks: inner.__clicks, pasted: inner.__pasted, rows: inner.__rows, dialogOpen });
+  };
+</script>
+</body>
+</html>

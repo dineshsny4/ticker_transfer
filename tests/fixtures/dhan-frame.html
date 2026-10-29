@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Fake Dhan chart frame</title>
+<style>
+  body { margin: 0; font: 13px sans-serif; }
+  .listContainer-x { position: relative; height: 120px; overflow: auto; }
+  .listContainer-x > .inner { position: relative; }
+  .row { position: absolute; left: 0; right: 0; height: 30px; }
+  [data-name="watchlist-symbol-search-dialog"] { position: fixed; top: 10px; left: 10px; width: 400px; background: #eee; }
+</style>
+</head>
+<body>
+<!-- A fake of the TradingView library in tv.dhan.co, with the markers that content/dhan.js uses.
+     ?list=JSON sets the rows: [["s","NSEE14014","LUMAX AUTO TECHNOLOGIES"],["h","IPO"],...]. -->
+<div data-test-id-widget-type="watchlist">
+  <div class="header"><span class="separator-qp5yBxtk"></span>
+    <div data-name="watchlists-button">Live</div>
+    <button data-name="add-symbol-button" aria-label="Add symbol">+</button>
+  </div>
+  <div data-name="symbol-list-wrap"><div data-name="tree"><div class="listContainer-x" id="sc"><div class="inner" id="inner"></div></div></div></div>
+</div>
+<script>
+  // The fake Dhan symbol database: id, title, exchange, company name.
+  const DB = [
+    ['NSEE14014', 'LUMAXTECH-EQ', 'NSE', 'LUMAX AUTO TECHNOLOGIES'],
+    ['BSEE532796', 'LUMAXTECH', 'BSE', 'LUMAX AUTO TECHNOLOGIES'],
+    ['NSEE25252', 'KROSS-EQ', 'NSE', 'KROSS'],
+    ['BSEE544253', 'KROSS', 'BSE', 'KROSS'],
+    ['NSEE2031', 'M&M-EQ', 'NSE', 'MAHINDRA & MAHINDRA'],
+    ['NSEE16669', 'BAJAJ-AUTO-EQ', 'NSE', 'BAJAJ AUTO'],
+    ['NSEE16670', 'BAJAJ-AUTO-BL', 'NSE', 'BAJAJ AUTO'],
+    ['BSEE590001', 'ONLYBSE', 'BSE', 'ONLY BSE COMPANY'],
+    ['NSEE3045', 'SBIN-EQ', 'NSE', 'STATE BANK OF INDIA'],
+  ];
+  const params = new URLSearchParams(location.search);
+  window.__rows = JSON.parse(params.get('list') || JSON.stringify([
+    ['h', 'WATCHLIST'], ['s', 'NSEE14014', 'LUMAX AUTO TECHNOLOGIES'], ['s', 'NSEE2031', 'MAHINDRA & MAHINDRA'],
+    ['s', 'BSEE590001', 'ONLY BSE COMPANY'], ['h', 'IPO'], ['s', 'NSEE16669', 'BAJAJ AUTO'], ['s', 'NSEE3045', 'STATE BANK OF INDIA'],
+  ]));
+  window.__clicks = [];
+  window.__pasted = [];
+  const sc = document.getElementById('sc');
+  const inner = document.getElementById('inner');
+
+  // Draw only the rows in view, a short time after a scroll (as the real list does).
+  function draw() {
+    inner.style.height = `${window.__rows.length * 30}px`;
+    inner.innerHTML = '';
+    const from = Math.floor(sc.scrollTop / 30);
+    const to = Math.ceil((sc.scrollTop + sc.clientHeight) / 30);
+    window.__rows.forEach((r, i) => {
+      if (i < from || i > to) return;
+      const d = document.createElement('div');
+      d.className = 'row';
+      d.style.top = `${i * 30}px`;
+      if (r[0] === 'h') {
+        d.innerHTML = '<div class="separator-eCC6Skn5"><span class="label-eCC6Skn5"></span></div>';
+        d.querySelector('span').textContent = r[1];
+        d.firstChild.style.height = '30px';
+      } else {
+        const s = document.createElement('div');
+        s.setAttribute('data-symbol-full', `${r[1]}:${r[2]}`);
+        s.setAttribute('data-symbol-short', r[2]);
+        s.style.height = '30px';
+        s.textContent = r[2];
+        d.append(s);
+      }
+      inner.append(d);
+    });
+  }
+  draw();
+  setInterval(draw, 60);
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (b) window.__clicks.push(b.getAttribute('data-name') || b.getAttribute('data-qa-id'));
+  }, true);
+
+  function closeDialog() {
+    const d = document.querySelector('[data-name="watchlist-symbol-search-dialog"]');
+    if (d) d.remove();
+  }
+
+  function search(q) {
+    const list = document.getElementById('res');
+    list.innerHTML = '';
+    if (!q) return;
+    const Q = q.toUpperCase();
+    for (const [id, title, ex, name] of DB) {
+      if (!title.replace(/-EQ$/, '').startsWith(Q) && !name.includes(Q)) continue;
+      const it = document.createElement('div');
+      it.setAttribute('data-name', 'symbol-search-dialog-content-item');
+      it.setAttribute('data-symbol-name', `${id}:${title.replace(/-EQ$/, '')}`);
+      it.innerHTML = '<span data-name="list-item-title"></span> <span class="exchangeName-abc"></span>';
+      it.firstChild.setAttribute('data-overflow-tooltip-text', title);
+      it.firstChild.textContent = title;
+      it.lastChild.textContent = ex;
+      list.append(it);
+    }
+  }
+
+  document.querySelector('[data-name="add-symbol-button"]').addEventListener('click', () => {
+    if (document.querySelector('[data-name="watchlist-symbol-search-dialog"]')) return;
+    const d = document.createElement('div');
+    d.setAttribute('data-name', 'watchlist-symbol-search-dialog');
+    d.innerHTML = '<button data-qa-id="close">x</button><input data-qa-id="symbol-search-input" placeholder="Search"><div id="res"></div>';
+    document.body.append(d);
+    const input = d.querySelector('input');
+    let t = null;
+    input.addEventListener('input', () => {
+      clearTimeout(t);
+      document.getElementById('res').innerHTML = '';
+      t = setTimeout(() => search(input.value), 150);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.keyCode !== 13) return;
+      const parts = input.value.split(',').map((x) => x.trim()).filter(Boolean);
+      if (parts.length < 2 && !parts.some((p) => p.startsWith('###'))) return;
+      window.__pasted.push(input.value);
+      for (const p of parts) {
+        if (p.startsWith('###')) window.__rows.push(['h', p.slice(3)]);
+        else {
+          const row = DB.find((r) => `${r[0]}:${r[1].replace(/-EQ$/, '')}` === p);
+          if (row) window.__rows.push(['s', row[0], row[3]]);
+        }
+      }
+      closeDialog();
+    });
+    d.querySelector('[data-qa-id="close"]').addEventListener('click', closeDialog);
+  });
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Ticker Transfer",
-  "version": "0.1.1",
-  "description": "Move a stock watchlist between TradingView and Zerodha Kite, with its sections.",
+  "version": "0.2.0",
+  "description": "Move a stock watchlist between TradingView, Zerodha Kite and Dhan, with its sections.",
   "icons": {
     "48": "icons/icon.svg",
     "96": "icons/icon.svg"
@@ -15,13 +15,19 @@
       "32": "icons/icon.svg"
     }
   },
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "ticker-transfer@nifty.trading.tools",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   }

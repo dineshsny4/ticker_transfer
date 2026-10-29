@@ -1,0 +1,465 @@
+<title>Ticker Transfer Popup Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one band per option. Each band shows the Export and Import popups at real size (380px), with notes beside them. */
+:root {
+  --page: #f3f5f8;
+  --ink: #16202c;
+  --muted: #5d6877;
+  --rule: #d6dce4;
+  --tag: #e3e9f1;
+  --display: "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --sys: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Shared popup tokens (A, B, D) */
+  --p-bg: #ffffff;
+  --p-fg: #1b2330;
+  --p-muted: #667283;
+  --p-line: #dde2e9;
+  --p-soft: #f3f5f8;
+  --p-accent: #1f6feb;
+  --p-accent-soft: #e4eefd;
+  --p-good: #1a7f4b;
+  --p-good-soft: #e3f4ea;
+  --p-warn: #946200;
+  --p-warn-soft: #fbf1d9;
+  --p-bad: #c0352b;
+  --p-shadow: 0 10px 30px rgba(22, 32, 44, .14), 0 1px 3px rgba(22, 32, 44, .1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #11151b; --ink: #e6eaf0; --muted: #98a3b2; --rule: #2a313b; --tag: #222a34;
+    --p-bg: #1b2028; --p-fg: #e7ebf1; --p-muted: #9aa5b4; --p-line: #313946; --p-soft: #232a34;
+    --p-accent: #5a9bff; --p-accent-soft: #1f2f4a; --p-good: #4cc38a; --p-good-soft: #1b3428;
+    --p-warn: #e3b341; --p-warn-soft: #3a3020; --p-bad: #ff7b72;
+    --p-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .04);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #11151b; --ink: #e6eaf0; --muted: #98a3b2; --rule: #2a313b; --tag: #222a34;
+  --p-bg: #1b2028; --p-fg: #e7ebf1; --p-muted: #9aa5b4; --p-line: #313946; --p-soft: #232a34;
+  --p-accent: #5a9bff; --p-accent-soft: #1f2f4a; --p-good: #4cc38a; --p-good-soft: #1b3428;
+  --p-warn: #e3b341; --p-warn-soft: #3a3020; --p-bad: #ff7b72;
+  --p-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .04);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 var(--display);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; letter-spacing: -.01em; }
+.lede { color: var(--muted); max-width: 68ch; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.legend a { font: 500 13px var(--display); color: var(--ink); text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; }
+.legend a:hover, .legend a:focus-visible { border-color: var(--ink); outline: none; }
+
+section.opt { border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 28px; display: grid; grid-template-columns: 260px 1fr; gap: 28px; }
+@media (max-width: 980px) { section.opt { grid-template-columns: 1fr; } }
+.about { min-width: 0; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.about h2 { font-size: 22px; margin: 4px 0 8px; text-wrap: balance; }
+.about p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.about ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.about .pro::marker { content: "+  "; color: #2b9a5f; font-weight: 700; }
+.about .con::marker { content: "–  "; color: #c0352b; font-weight: 700; }
+.shots { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; min-width: 0; }
+.shot { display: grid; gap: 8px; max-width: 100%; }
+.shot > .cap { font: 500 12px var(--mono); color: var(--muted); }
+
+/* ---------- Common popup frame ---------- */
+.pp { width: 380px; max-width: 100%; background: var(--p-bg); color: var(--p-fg); font: 13px/1.45 var(--sys); border-radius: 10px; box-shadow: var(--p-shadow); overflow: hidden; }
+.pp button { font: inherit; cursor: pointer; }
+.pp button:focus-visible { outline: 2px solid var(--p-accent); outline-offset: 2px; }
+.mono { font-family: ui-monospace, Consolas, monospace; }
+.muted { color: var(--p-muted); }
+.btn { border: 0; border-radius: 8px; padding: 7px 14px; background: var(--p-accent); color: #fff; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--p-fg); border: 1px solid var(--p-line); font-weight: 500; }
+.btn.wide { width: 100%; padding: 9px 14px; }
+
+/* ---------- A: Tabs + cards ---------- */
+.a-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid var(--p-line); }
+.a-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.a-logo { width: 20px; height: 20px; border-radius: 5px; background: var(--p-accent); display: grid; place-items: center; color: #fff; font-size: 11px; }
+.a-tabs { display: flex; background: var(--p-soft); border-radius: 8px; padding: 2px; }
+.a-tabs span { padding: 3px 12px; border-radius: 6px; color: var(--p-muted); }
+.a-tabs span.on { background: var(--p-bg); color: var(--p-fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+.a-body { padding: 12px 14px 14px; display: grid; gap: 10px; }
+.a-site { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.a-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p-good); flex: none; }
+.a-site b { display: block; }
+.a-site small { color: var(--p-muted); font-size: 12px; }
+.a-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.a-stats div { background: var(--p-soft); border-radius: 8px; padding: 7px 8px; }
+.a-stats b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+.a-stats span { font-size: 11px; color: var(--p-muted); }
+.a-text { background: var(--p-soft); border: 1px solid var(--p-line); border-radius: 8px; padding: 8px; font: 11.5px/1.4 ui-monospace, Consolas, monospace; word-break: break-all; color: var(--p-fg); max-height: 92px; overflow: hidden; }
+.a-row { display: flex; gap: 8px; }
+.a-note { font-size: 12px; color: var(--p-warn); background: var(--p-warn-soft); border-radius: 6px; padding: 6px 8px; }
+.a-grp { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+.a-grp .new { color: var(--p-accent); font-size: 12px; }
+.a-grp .reuse { color: var(--p-muted); font-size: 12px; }
+.a-switch { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; }
+.tog { width: 30px; height: 17px; border-radius: 9px; background: var(--p-accent); position: relative; flex: none; }
+.tog::after { content: ""; position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: #fff; }
+.tog.off { background: var(--p-line); }
+.tog.off::after { right: auto; left: 2px; }
+.a-sel { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border: 1px solid var(--p-line); border-radius: 8px; }
+
+/* ---------- B: Route (from -> to) ---------- */
+.b-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 14px; background: var(--p-soft); border-bottom: 1px solid var(--p-line); }
+.b-end { background: var(--p-bg); border: 1px solid var(--p-line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.b-end.here { border-color: var(--p-accent); box-shadow: 0 0 0 3px var(--p-accent-soft); }
+.b-end small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--p-muted); }
+.b-end b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.b-end span { font-size: 12px; color: var(--p-muted); }
+.b-arrow { color: var(--p-accent); font-size: 18px; font-weight: 700; }
+.b-body { padding: 12px 14px 14px; display: grid; gap: 10px; }
+.b-steps { display: flex; gap: 6px; font-size: 11.5px; }
+.b-steps span { flex: 1; text-align: center; padding: 4px 0; border-radius: 6px; background: var(--p-soft); color: var(--p-muted); }
+.b-steps span.done { background: var(--p-good-soft); color: var(--p-good); }
+.b-steps span.now { background: var(--p-accent-soft); color: var(--p-accent); font-weight: 600; }
+.b-big { display: flex; align-items: baseline; gap: 8px; }
+.b-big b { font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1; }
+.b-list { border: 1px solid var(--p-line); border-radius: 8px; overflow: hidden; }
+.b-list div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 10px; }
+.b-list div + div { border-top: 1px solid var(--p-line); }
+.b-list em { font-style: normal; color: var(--p-muted); font-variant-numeric: tabular-nums; }
+.b-list .skip { color: var(--p-warn); }
+.b-foot { display: flex; gap: 8px; }
+.b-foot .btn:first-child { flex: 1; }
+.b-meter { height: 6px; border-radius: 3px; background: var(--p-soft); overflow: hidden; display: flex; }
+.b-meter i { display: block; background: var(--p-muted); opacity: .45; }
+.b-meter i + i { background: var(--p-accent); opacity: 1; }
+
+/* ---------- C: Terminal (dark only, by choice) ---------- */
+.pc { --c-bg: #0d1117; --c-panel: #151b23; --c-line: #262f3b; --c-fg: #d5dde7; --c-dim: #7b8796; --c-amber: #f0b429; --c-up: #3fb950; --c-down: #f85149; --c-blue: #58a6ff;
+  background: var(--c-bg); color: var(--c-fg); font: 12.5px/1.5 var(--mono); border-radius: 8px; width: 380px; max-width: 100%; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35); color-scheme: dark; }
+.c-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--c-line); background: var(--c-panel); }
+.c-bar b { color: var(--c-amber); letter-spacing: .04em; }
+.c-keys { display: flex; gap: 2px; }
+.c-keys span { padding: 1px 8px; color: var(--c-dim); border: 1px solid transparent; }
+.c-keys span.on { color: var(--c-bg); background: var(--c-amber); }
+.c-body { padding: 10px 12px 12px; display: grid; gap: 8px; }
+.c-kv { display: grid; grid-template-columns: 74px 1fr; gap: 2px 8px; }
+.c-kv dt { color: var(--c-dim); }
+.c-kv dd { margin: 0; }
+.c-kv .ok { color: var(--c-up); }
+.c-sec { color: var(--c-amber); margin-top: 2px; }
+.c-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.c-chips span { border: 1px solid var(--c-line); padding: 0 6px; border-radius: 3px; }
+.c-chips span.dup { color: var(--c-dim); text-decoration: line-through; }
+.c-chips span.bad { color: var(--c-down); border-color: #4a2124; }
+.c-hr { border: 0; border-top: 1px dashed var(--c-line); margin: 2px 0; }
+.c-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.c-acts button { font: inherit; background: transparent; color: var(--c-fg); border: 1px solid var(--c-line); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.c-acts button.main { background: var(--c-amber); color: var(--c-bg); border-color: var(--c-amber); font-weight: 600; }
+.c-acts kbd { font: inherit; color: var(--c-dim); margin-left: 4px; }
+.c-acts button.main kbd { color: #5b4407; }
+.c-warn { color: var(--c-amber); }
+.c-prog { color: var(--c-blue); }
+
+/* ---------- D: Sections first ---------- */
+.d-head { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+.d-head b { font-size: 14px; }
+.d-chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--p-good-soft); color: var(--p-good); font-weight: 600; }
+.d-seg { display: grid; grid-template-columns: 1fr 1fr; margin: 0 14px; border-bottom: 1px solid var(--p-line); }
+.d-seg span { text-align: center; padding: 6px 0 8px; color: var(--p-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.d-seg span.on { color: var(--p-fg); border-bottom-color: var(--p-accent); font-weight: 600; }
+.d-body { padding: 10px 14px 0; display: grid; gap: 8px; }
+.d-sec { border: 1px solid var(--p-line); border-radius: 8px; }
+.d-sec header { display: flex; align-items: center; gap: 8px; padding: 7px 10px; }
+.d-sec header .chev { color: var(--p-muted); width: 10px; }
+.d-sec header b { flex: 1; min-width: 0; }
+.d-sec header .n { color: var(--p-muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+.d-sec header .to { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--p-accent-soft); color: var(--p-accent); }
+.d-sec header .to.old { background: var(--p-soft); color: var(--p-muted); }
+.d-syms { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 10px 9px 28px; }
+.d-syms span { font: 11.5px ui-monospace, Consolas, monospace; padding: 1px 6px; border-radius: 4px; background: var(--p-soft); }
+.d-syms span.have { opacity: .45; text-decoration: line-through; }
+.d-syms span.left { background: var(--p-warn-soft); color: var(--p-warn); }
+.d-sec.closed .d-syms { display: none; }
+.d-tray { margin-top: 10px; padding: 10px 14px 12px; border-top: 1px solid var(--p-line); background: var(--p-soft); display: grid; gap: 8px; }
+.d-tray .line { display: flex; justify-content: space-between; font-size: 12px; color: var(--p-muted); }
+.d-tray .line b { color: var(--p-fg); }
+.d-tray .acts { display: flex; gap: 8px; }
+.d-tray .acts .btn:first-child { flex: 1; }
+
+/* ---------- Page progress panel (shown with B) ---------- */
+.panel { width: 300px; max-width: 100%; background: var(--p-bg); color: var(--p-fg); font: 12.5px/1.45 var(--sys); border-radius: 10px; box-shadow: var(--p-shadow); padding: 12px; display: grid; gap: 8px; }
+.panel .top { display: flex; justify-content: space-between; font-weight: 600; }
+.panel .bar { height: 6px; border-radius: 3px; background: var(--p-soft); overflow: hidden; }
+.panel .bar i { display: block; width: 62%; height: 100%; background: var(--p-accent); }
+.panel .row { display: flex; gap: 8px; }
+
+.foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 14px; max-width: 72ch; }
+@media (prefers-reduced-motion: no-preference) { .legend a { transition: border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <h1>Ticker Transfer popup: four options</h1>
+  <p class="lede">Each option shows the same two moments at real popup size (380 px wide): Export on a TradingView chart, and the Import preview on Zerodha Kite. All data is example data. Pick one, or mix parts of two.</p>
+  <nav class="legend" aria-label="Options">
+    <a href="#optA">A · Tabs and cards</a>
+    <a href="#optB">B · Route from → to</a>
+    <a href="#optC">C · Trader terminal</a>
+    <a href="#optD">D · Sections first</a>
+  </nav>
+
+  <!-- ================= A ================= -->
+  <section class="opt" id="optA">
+    <div class="about">
+      <div class="eyebrow">Option A</div>
+      <h2>Tabs and cards</h2>
+      <p>A cleaner form of the popup you have now. Import and Export stay as two tabs. A status card shows the site, and three small counts give the summary.</p>
+      <ul>
+        <li class="pro">Smallest change to the current code.</li>
+        <li class="pro">Familiar. Users of TickerDrop know this layout.</li>
+        <li class="con">The raw list text takes a lot of space.</li>
+        <li class="con">Groups show as plain rows, without the symbols.</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div class="shot">
+        <div class="cap">Export · tradingview.com/chart</div>
+        <div class="pp">
+          <div class="a-head">
+            <div class="a-brand"><span class="a-logo">TT</span>Ticker Transfer</div>
+            <div class="a-tabs"><span>Import</span><span class="on">Export</span></div>
+          </div>
+          <div class="a-body">
+            <div class="a-site"><span class="a-dot"></span><div><b>TradingView · Swing setups</b><small>Active watchlist, read from the page</small></div></div>
+            <div class="a-stats">
+              <div><b>13</b><span>symbols</span></div>
+              <div><b>2</b><span>sections</span></div>
+              <div><b>1</b><span>left out</span></div>
+            </div>
+            <div class="a-text">###VR1 first move,NSE:KROSS,NSE:PNB,NSE:PLATIND,NSE:M_M,NSE:BAJAJ_AUTO,NSE:LUMAXTECH,NSE:TATAPOWER,NSE:IRFC,###VR2 pullback,NSE:IXIGO,NSE:DEEPAKFERT,NSE:HAL,NSE:BEL,NSE:CDSL</div>
+            <div class="a-note">BSE:533282 is not on NSE. The export leaves it out.</div>
+            <div class="a-row"><button class="btn">Copy</button><button class="btn ghost">Download .txt</button><button class="btn ghost">Read again</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="cap">Import preview · kite.zerodha.com</div>
+        <div class="pp">
+          <div class="a-head">
+            <div class="a-brand"><span class="a-logo">TT</span>Ticker Transfer</div>
+            <div class="a-tabs"><span class="on">Import</span><span>Export</span></div>
+          </div>
+          <div class="a-body">
+            <div class="a-site"><span class="a-dot"></span><div><b>Zerodha Kite</b><small>Use the last export (TradingView, 13 symbols)</small></div></div>
+            <div class="a-sel"><span>Target list</span><b>Swing ▾ <span class="muted">40 / 250</span></b></div>
+            <div class="a-grp"><span>VR1 first move <span class="muted">8</span></span><span class="new">→ new group</span></div>
+            <div class="a-grp"><span>VR2 pullback <span class="muted">5</span></span><span class="reuse">→ add to existing group</span></div>
+            <div class="a-switch"><span>Put each section into its own group</span><span class="tog"></span></div>
+            <div class="a-note">2 symbols are already in this list. Kite will skip them.</div>
+            <button class="btn wide">Add 11 to Kite</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= B ================= -->
+  <section class="opt" id="optB">
+    <div class="about">
+      <div class="eyebrow">Option B</div>
+      <h2>Route from → to</h2>
+      <p>No tabs. The top strip shows where the list comes from and where it goes. The popup knows the site of this tab, so it shows only the next step.</p>
+      <ul>
+        <li class="pro">The user always sees the full move: source, list, target.</li>
+        <li class="pro">One main button for each screen. Hard to click the wrong thing.</li>
+        <li class="pro">The page panel (right) keeps the progress when the popup closes.</li>
+        <li class="con">More new code. The popup needs a small state machine.</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div class="shot">
+        <div class="cap">Export · tradingview.com/chart</div>
+        <div class="pp">
+          <div class="b-route">
+            <div class="b-end here"><small>From · this tab</small><b>TradingView</b><span>Swing setups</span></div>
+            <div class="b-arrow">→</div>
+            <div class="b-end"><small>To</small><b>Any site</b><span>open it next</span></div>
+          </div>
+          <div class="b-body">
+            <div class="b-steps"><span class="done">1 Read</span><span class="now">2 Keep</span><span>3 Add</span></div>
+            <div class="b-big"><b>13</b><span class="muted">symbols in 2 sections</span></div>
+            <div class="b-list">
+              <div><span>VR1 first move</span><em>8</em></div>
+              <div><span>VR2 pullback</span><em>5</em></div>
+              <div><span class="skip">Left out: BSE:533282 (not on NSE)</span><em>1</em></div>
+            </div>
+            <div class="b-foot"><button class="btn">Keep for import</button><button class="btn ghost">Copy</button><button class="btn ghost">.txt</button></div>
+            <span class="muted" style="font-size:12px">Next: open Kite, Upstox or another TradingView list. Click the icon again.</span>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="cap">Import preview · kite.zerodha.com</div>
+        <div class="pp">
+          <div class="b-route">
+            <div class="b-end"><small>From · kept list</small><b>TradingView</b><span>13 symbols</span></div>
+            <div class="b-arrow">→</div>
+            <div class="b-end here"><small>To · this tab</small><b>Kite · Swing ▾</b><span>40 / 250 used</span></div>
+          </div>
+          <div class="b-body">
+            <div class="b-steps"><span class="done">1 Read</span><span class="done">2 Keep</span><span class="now">3 Add</span></div>
+            <div class="b-list">
+              <div><span>VR1 first move → new group</span><em>8</em></div>
+              <div><span>VR2 pullback → existing group</span><em>5</em></div>
+              <div><span class="skip">Already in Swing, skip</span><em>2</em></div>
+            </div>
+            <div>
+              <div class="b-meter"><i style="width:16%"></i><i style="width:4.4%"></i></div>
+              <span class="muted" style="font-size:12px">After the import: 51 / 250</span>
+            </div>
+            <div class="b-foot"><button class="btn">Add 11 to Kite</button><button class="btn ghost">Paste other list</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="cap">Panel on the Kite page, while it runs</div>
+        <div class="panel">
+          <div class="top"><span>Kite · Swing</span><span class="muted">7 / 11</span></div>
+          <div class="bar"><i></i></div>
+          <div class="muted">VR1 first move → adding PLATIND…</div>
+          <div class="row"><button class="btn ghost">Stop</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= C ================= -->
+  <section class="opt" id="optC">
+    <div class="about">
+      <div class="eyebrow">Option C</div>
+      <h2>Trader terminal</h2>
+      <p>Dense, dark and monospace, like a trading terminal. Symbols show as small chips. Skipped and failed symbols have their own marks. Dark only, by choice.</p>
+      <ul>
+        <li class="pro">Most data in the smallest space.</li>
+        <li class="pro">Looks at home next to Kite and TradingView dark themes.</li>
+        <li class="con">Less friendly for new users.</li>
+        <li class="con">Keyboard hints must not use B or S (Kite order keys).</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div class="shot">
+        <div class="cap">Export · tradingview.com/chart</div>
+        <div class="pc">
+          <div class="c-bar"><b>TICKER·TRANSFER</b><div class="c-keys"><span>IMPORT</span><span class="on">EXPORT</span></div></div>
+          <div class="c-body">
+            <dl class="c-kv">
+              <dt>source</dt><dd>TradingView / Swing setups</dd>
+              <dt>status</dt><dd class="ok">● read 13 sym · 2 sec</dd>
+            </dl>
+            <hr class="c-hr">
+            <div class="c-sec">### VR1 first move · 8</div>
+            <div class="c-chips"><span>KROSS</span><span>PNB</span><span>PLATIND</span><span>M_M</span><span>BAJAJ_AUTO</span><span>LUMAXTECH</span><span>TATAPOWER</span><span>IRFC</span></div>
+            <div class="c-sec">### VR2 pullback · 5</div>
+            <div class="c-chips"><span>IXIGO</span><span>DEEPAKFERT</span><span>HAL</span><span>BEL</span><span>CDSL</span></div>
+            <div class="c-warn">! left out: BSE:533282 (no NSE listing)</div>
+            <hr class="c-hr">
+            <div class="c-acts"><button class="main">COPY<kbd>C</kbd></button><button>.TXT<kbd>D</kbd></button><button>RE-READ<kbd>R</kbd></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="cap">Import preview · kite.zerodha.com</div>
+        <div class="pc">
+          <div class="c-bar"><b>TICKER·TRANSFER</b><div class="c-keys"><span class="on">IMPORT</span><span>EXPORT</span></div></div>
+          <div class="c-body">
+            <dl class="c-kv">
+              <dt>from</dt><dd>last export · TradingView · 13</dd>
+              <dt>target</dt><dd>Kite / Swing ▾ · 40/250</dd>
+              <dt>sections</dt><dd>→ groups [on]</dd>
+            </dl>
+            <hr class="c-hr">
+            <div class="c-sec">### VR1 first move → NEW GROUP</div>
+            <div class="c-chips"><span>KROSS</span><span class="dup">PNB</span><span>PLATIND</span><span>M&amp;M</span><span>BAJAJ-AUTO</span><span>LUMAXTECH</span><span class="dup">TATAPOWER</span><span>IRFC</span></div>
+            <div class="c-sec">### VR2 pullback → EXISTING</div>
+            <div class="c-chips"><span>IXIGO</span><span>DEEPAKFERT</span><span>HAL</span><span>BEL</span><span>CDSL</span></div>
+            <div class="c-prog">» 11 to add · 2 already present (struck out)</div>
+            <hr class="c-hr">
+            <div class="c-acts"><button class="main">ADD 11 TO KITE<kbd>⏎</kbd></button><button>PASTE<kbd>P</kbd></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= D ================= -->
+  <section class="opt" id="optD">
+    <div class="about">
+      <div class="eyebrow">Option D</div>
+      <h2>Sections first</h2>
+      <p>The list itself is the main content. Each section is a row that opens to show its symbols. The actions sit in a fixed tray at the bottom.</p>
+      <ul>
+        <li class="pro">Users check the symbols before they click Add.</li>
+        <li class="pro">Each section shows its target group in place.</li>
+        <li class="pro">The buttons stay in the same place on both tabs.</li>
+        <li class="con">A long list (100+ symbols) needs scroll inside the popup.</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div class="shot">
+        <div class="cap">Export · tradingview.com/chart</div>
+        <div class="pp">
+          <div class="d-head"><b>Ticker Transfer</b><span class="d-chip">TradingView</span></div>
+          <div class="d-seg"><span>Import</span><span class="on">Export</span></div>
+          <div class="d-body">
+            <div class="muted" style="font-size:12px">Swing setups · 13 symbols · 2 sections</div>
+            <div class="d-sec">
+              <header><span class="chev">▾</span><b>VR1 first move</b><span class="n">8</span></header>
+              <div class="d-syms"><span>KROSS</span><span>PNB</span><span>PLATIND</span><span>M_M</span><span>BAJAJ_AUTO</span><span>LUMAXTECH</span><span>TATAPOWER</span><span>IRFC</span></div>
+            </div>
+            <div class="d-sec closed">
+              <header><span class="chev">▸</span><b>VR2 pullback</b><span class="n">5</span></header>
+              <div class="d-syms"><span>IXIGO</span></div>
+            </div>
+            <div class="d-sec">
+              <header><span class="chev">▾</span><b>Left out</b><span class="n">1</span></header>
+              <div class="d-syms"><span class="left">BSE:533282 · not on NSE</span></div>
+            </div>
+          </div>
+          <div class="d-tray">
+            <div class="line"><span>Kept for import</span><b>13 symbols</b></div>
+            <div class="acts"><button class="btn">Copy list</button><button class="btn ghost">Download .txt</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="cap">Import preview · kite.zerodha.com</div>
+        <div class="pp">
+          <div class="d-head"><b>Ticker Transfer</b><span class="d-chip">Zerodha Kite</span></div>
+          <div class="d-seg"><span class="on">Import</span><span>Export</span></div>
+          <div class="d-body">
+            <div class="a-sel"><span class="muted">Into list</span><b>Swing ▾ <span class="muted">40 / 250</span></b></div>
+            <div class="d-sec">
+              <header><span class="chev">▾</span><b>VR1 first move</b><span class="n">6 of 8</span><span class="to">new group</span></header>
+              <div class="d-syms"><span>KROSS</span><span class="have">PNB</span><span>PLATIND</span><span>M&amp;M</span><span>BAJAJ-AUTO</span><span>LUMAXTECH</span><span class="have">TATAPOWER</span><span>IRFC</span></div>
+            </div>
+            <div class="d-sec closed">
+              <header><span class="chev">▸</span><b>VR2 pullback</b><span class="n">5 of 5</span><span class="to old">existing</span></header>
+              <div class="d-syms"><span>IXIGO</span></div>
+            </div>
+            <div class="a-switch"><span>Put each section into its own group</span><span class="tog"></span></div>
+          </div>
+          <div class="d-tray">
+            <div class="line"><span>From the last export · 2 already in Swing</span><b>11 to add</b></div>
+            <div class="acts"><button class="btn">Add 11 to Kite</button><button class="btn ghost">Paste list</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">All four options keep the same rules: the popup never opens the watchlist panel for you, and it never clicks Buy, Sell or any order control. Firefox popups follow the system theme, so options A, B and D have a light and a dark form. Change your system theme to see both.</p>
+</div>
