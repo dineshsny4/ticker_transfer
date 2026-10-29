@@ -1,19 +1,29 @@
 # Ticker Transfer
 
-> **Seamlessly move stock watchlists between TradingView and Zerodha Kite with sections and groups intact.**
+> **Move a stock watchlist between TradingView, Zerodha Kite and Dhan, with its sections and groups.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-orange.svg)](manifest.json)
 [![Tests: 18 passed](https://img.shields.io/badge/Tests-18%20passed-brightgreen.svg)](tests/)
 [![Platform](https://img.shields.io/badge/Browser-Firefox-red.svg)](https://addons.mozilla.org/firefox/addon/ticker-transfer/)
 
-A watchlist takes time to build and is typically locked to the platform where it was created. Manually copying 100+ NSE symbols with multiple sections across platforms requires hours of tedious retyping and rebuilding groups.
+A watchlist takes time to build, and it stays on the site where you built it. To move 100 or more NSE symbols in many sections by hand, you must type each symbol again and make each group again.
 
-**Ticker Transfer** automates the entire process. It reads the watchlist you already have open in your browser tab, preserves section structures (e.g. `###WEEKLY`, `###BREAKOUT`), and inputs symbols directly into the destination platform via native page controls—no API keys, no server communication, and zero data tracking.
+**Ticker Transfer** does this work for you. It reads the watchlist that is open in your browser tab and keeps its sections (for example `###WEEKLY` or `###BREAKOUT`). Then it adds the symbols on the other site with that site's own buttons and search box. It uses no API keys, no server and no tracking.
+
+## Supported websites
+
+| Site | Export | Import | How the import adds the list |
+| :--- | :---: | :---: | :--- |
+| [TradingView](https://www.tradingview.com/chart/) | ✓ | ✓ | The whole list in one step, through the "Add symbol" box |
+| [Zerodha Kite](https://kite.zerodha.com/) | ✓ | ✓ | One stock at a time, through Kite's search box, into each group |
+| [Dhan](https://tv.dhan.co/) | ✓ | ✓ | Finds each symbol in Dhan's search, then adds the whole list in one step |
+
+You can move a list in all directions, for example TradingView to Kite, Kite to Dhan or Dhan to TradingView.
 
 ---
 
-## Visuals & Screenshots
+## Screenshots
 
 | 1. Export from TradingView | 2. Import preview on Zerodha Kite |
 | :---: | :---: |
@@ -38,78 +48,95 @@ A watchlist takes time to build and is typically locked to the platform where it
 
 ---
 
-## Key Features
+## Key features
 
-- **Full Section & Group Preservation:**
-  - TradingView sections (e.g. `###BREAKOUT`, `###SWING`, `###MONTHLY`) are converted directly into Zerodha Kite groups, and vice versa.
-  - Automatically creates new groups on Zerodha Kite if they do not exist yet.
-  - Adds stocks into their corresponding group without losing structure.
+- **Sections and groups stay the same**
+  - TradingView sections, Kite groups and Dhan sections all become `###NAME` lines in the export.
+  - The import puts each stock into its own section or group. On Kite, it makes a group if the group does not exist.
 
-- **Two-Way Synchronization:**
-  - **TradingView ➔ Zerodha Kite:** Read an open TradingView chart watchlist, copy or download the text, and populate your Kite marketwatch.
-  - **Zerodha Kite ➔ TradingView:** Read your active Kite watchlist and groups, export as TradingView-compatible text, and import directly into TradingView.
+- **Preview before you import**
+  - The Import tab shows the target list and how many symbols it has.
+  - It shows each section, and if it is a new group or an existing group.
+  - It strikes out the symbols that are already in the list. The import skips them.
+  - It names each symbol that it leaves out, with the reason.
 
-- **Smart Ticker Resolution:**
-  - Automatically harmonizes syntax differences across platforms:
-    - `BAJAJ_AUTO` (TradingView) ⟷ `BAJAJ-AUTO` (Kite)
-    - `M&M` (TradingView) ⟷ `M&M` (Kite)
-    - `SKYGOLD` ⟷ `SKYGOLD-BE` / `SKYGOLD-BZ` (Handles series suffixes automatically)
-  - Duplicate prevention: checks existing watchlist rows and never adds the same stock twice.
-  - List limit guard: respects Zerodha Kite's watchlist capacity (e.g. 50/100 stocks) and reports skipped items cleanly when full.
+- **Progress in the popup, on all sites**
+  - A progress bar shows the current symbol and the count.
+  - **Stop** pauses the import. Then you can continue it or exit it. The stocks that it added stay in the list.
+  - You can close the popup during a Kite or Dhan import. Open it again to see the progress.
+  - At the end, the popup lists each stock that it could not add, with the reason.
+  - **Retry** tries those stocks again in their own sections. **Copy list** copies them. **Done** (green) takes you back to the Import tab.
 
-- **100% Client-Side & Private:**
-  - **No external server, analytics, tracking, or telemetry.**
-  - **No account credentials or broker tokens required.**
-  - Makes zero network requests (`fetch`, `XMLHttpRequest`, `WebSocket` are completely absent).
-  - Operates solely within the active tab via native DOM interactions when you click the extension icon.
-  - Declared `data_collection_permissions.required: ["none"]`.
+- **Symbol names match across sites**
+  - `BAJAJ_AUTO` (TradingView) ⟷ `BAJAJ-AUTO` (Kite)
+  - `M&M` (TradingView) ⟷ `M&M` (Kite)
+  - `SKYGOLD` ⟷ `SKYGOLD-BE` / `SKYGOLD-BZ` (Kite series suffixes)
+  - On Dhan, the extension picks the NSE listing (`SYMBOL-EQ`).
+  - The extension never adds a stock two times to one list. On Kite, it stops at the list limit that the page shows.
+
+- **NSE only**
+  - The extension moves NSE symbols only, because all three sites share this listing.
+  - It leaves out BSE-only stocks and other exchanges, and the popup names each one.
+
+- **Private and safe**
+  - No server, no analytics, no tracking and no telemetry.
+  - No account details or broker tokens. The extension uses the page where you are already signed in.
+  - No network requests of its own (no `fetch`, `XMLHttpRequest` or `WebSocket`).
+  - It runs only after you click the toolbar icon, and only on the open tab.
+  - It clicks only watchlist controls. It never clicks Buy, Sell, or any order, holdings or funds control.
+  - The manifest declares `data_collection_permissions.required: ["none"]`.
 
 ---
 
-## Watchlist Format
+## Watchlist format
 
-Ticker Transfer uses TradingView's native plain-text watchlist format. Each section begins with `###SECTION_NAME`, followed by comma-separated NSE tickers:
+Ticker Transfer uses TradingView's own plain-text watchlist format. Each section starts with `###SECTION_NAME`, followed by comma-separated NSE tickers:
 
 ```text
 ###BREAKOUT_LEADERS,NSE:RELIANCE,NSE:TCS,NSE:INFY,###SWING_TRADES,NSE:HDFCBANK,NSE:TATAMOTORS,NSE:ICICIBANK,###BLUECHIP,NSE:LT,NSE:BAJAJ_AUTO
 ```
 
-Because it uses standard plain text:
-- You can save your watchlists as `.txt` files.
-- You can edit symbols in any text editor before importing.
-- You can copy-paste lists from notes, Telegram groups, or Excel sheets.
+Because it is plain text:
+- You can save a watchlist as a `.txt` file (Export has a **Download .txt** button).
+- You can edit the symbols in a text editor before you import them.
+- You can paste a list from your notes, a chat or a spreadsheet.
 
 ---
 
-## How It Works
+## How to use it
 
-### 1. Exporting from TradingView
-1. Open any chart on [tradingview.com](https://www.tradingview.com/chart/) and ensure the **Watchlist** panel on the right is open.
-2. Click the **Ticker Transfer** toolbar icon.
-3. The popup automatically scans the visible and virtualized watchlist rows, extracting symbols and sections.
-4. Click **Copy List** or **Download .txt**.
+Show the watchlist on the page before you click the icon. The extension does not open the watchlist panel for you. If the panel is not visible, the popup tells you what to do.
 
-### 2. Importing into Zerodha Kite
-1. Navigate to [kite.zerodha.com](https://kite.zerodha.com/) and open your desired watchlist tab (e.g., list 1 to 7).
-2. Click the extension toolbar icon and switch to the **Import** tab.
-3. Paste your watchlist text (or click **Use the last export**).
-4. Review the detected groups and stock counts, then click **Add to Kite**.
-5. A floating progress panel appears at the lower-right corner of Kite, showing real-time addition, current group selection, and a **Stop** button.
+### Export
+1. Open the site that has your list:
+   - **TradingView:** open a chart and show the **Watchlist** panel on the right.
+   - **Zerodha Kite:** open the watchlist on the left side of the page. If the window is narrow, make it wider.
+   - **Dhan:** open [tv.dhan.co](https://tv.dhan.co/), wait for the chart, and show the **Watchlist** panel on the right.
+2. Click the **Ticker Transfer** toolbar icon. The **Export** tab reads the open watchlist.
+3. Click **Copy** or **Download .txt**.
 
-### 3. Importing into TradingView
-1. Open [tradingview.com/chart/](https://www.tradingview.com/chart/) with the Watchlist panel active.
-2. Open the extension popup, go to the **Import** tab, and click **Add to TradingView**.
-3. The extension opens TradingView's symbol search dialog, inputs the batch list, and triggers a single native Enter event, creating sections and stocks in one step.
+On Dhan, a watchlist row shows only the company name. The extension finds each ticker in Dhan's search, about one second for each stock. Keep the popup open until it finishes, or click **Stop**.
+
+### Import
+1. Open the target site and the target watchlist. Use a spare list for your first test.
+2. Click the toolbar icon and open the **Import** tab.
+3. Click **Use the last export**, or paste a list.
+4. Look at the preview: the groups, the symbols that are already in the list, and the symbols that are left out.
+5. Click **Add to TradingView**, **Add to Kite** or **Add to Dhan**.
+6. Watch the progress in the popup. Click **Stop** to pause, then **Continue import** or **Exit import**.
+7. At the end, use **Retry** or **Copy list** for the stocks that did not go in. Click **Done**.
+
+Keep the site tab in front until the import finishes.
 
 ---
 
-## Development & Testing
+## Development and testing
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- Firefox Browser
+- [Node.js](https://nodejs.org/) (v18 or later)
+- Firefox
 
-### Getting Started
+### Getting started
 
 1. **Clone the repository:**
    ```bash
@@ -117,44 +144,45 @@ Because it uses standard plain text:
    cd ticker_transfer
    ```
 
-2. **Run tests:**
+2. **Run the tests:**
    ```bash
    npm test
    ```
-   Runs the test suite across symbol normalization, export formatting, and parser logic:
+   The unit tests cover symbol names, the list format and the TradingView export:
    - `tests/listformat.test.js`
    - `tests/normalize.test.js`
    - `tests/tvexport.test.js`
 
-3. **Start in Firefox (Development Mode):**
+3. **Start Firefox with the extension:**
    ```bash
    npm start
    ```
-   Launches Firefox with the extension loaded and opens TradingView automatically.
+   Firefox opens with the extension loaded, on a TradingView chart.
 
 4. **Lint the extension:**
    ```bash
    npm run lint
    ```
 
-5. **Build the production package:**
+5. **Build the package:**
    ```bash
    npm run build
    ```
-   Outputs the zipped add-on ready for AMO upload in `web-ext-artifacts/ticker_transfer-0.1.1.zip`.
+   The zip for AMO goes into `web-ext-artifacts/` (for example `ticker_transfer-0.2.1.zip`).
 
 ---
 
 ## Requirements
 
-- **Browser:** Mozilla Firefox 142.0+ (Manifest V3)
+- **Browser:** Mozilla Firefox 142.0 or later (Manifest V3)
+- **Accounts:** a TradingView account, a Zerodha account for Kite, or a Dhan account for Dhan.
 - **Permissions:**
-  - `activeTab`: To inspect and interact with the active page upon user click.
-  - `scripting`: To inject the importer/reader into the active tab.
-  - `storage`: To persist your last exported list and popup draft locally on your machine.
+  - `activeTab`: to read and act on the open tab after you click the icon.
+  - `scripting`: to load the reader and importer into that tab.
+  - `storage`: to keep your last export, the Import draft and the last popup tab on your computer.
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+This project uses the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
