@@ -24,7 +24,7 @@
           const base = { kind: 'import', target: site === 'kite' ? 'Zerodha Kite · list Swing (46 / 250)' : 'Dhan · list Weekly', total: 13,
             tip: 'Keep this tab in front until it finishes.' };
           if (q.get('run') === 'running') return { ...base, running: true, paused: window.__paused, done: 6, status: '6 / 13 · 6 added', now: 'VR1 first move → adding PLATIND…' };
-          return { ...base, running: false, done: 13, status: '13 / 13 · 11 added · 2 failed', now: '',
+          return { ...base, target: base.target.replace('46 /', '51 /'), running: false, done: 13, status: '13 / 13 · 11 added · 2 failed', now: '',
             result: { ok: true, kind: 'good', message: 'All done. New groups: VR1 first move.',
               failed: [{ symbol: 'PLATIND', reason: 'only listed on BSE', section: 'VR1 first move' }, { symbol: 'DEEPAKFERT', reason: "search did not find it on NSE", section: 'VR2 pullback' }] } };
         }

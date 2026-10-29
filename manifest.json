@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Ticker Transfer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Move a stock watchlist between TradingView, Zerodha Kite and Dhan, with its sections.",
   "icons": {
     "48": "icons/icon.svg",

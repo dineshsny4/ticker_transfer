@@ -15,15 +15,25 @@ A watchlist takes time to build and is typically locked to the platform where it
 
 ## Visuals & Screenshots
 
-| 1. Export from TradingView | 2. Import into Zerodha Kite |
+| 1. Export from TradingView | 2. Import preview on Zerodha Kite |
 | :---: | :---: |
-| ![Export from TradingView](assets/screenshot-1-export-tradingview.png) | ![Import into Zerodha Kite](assets/screenshot-2-import-kite.png) |
-| *One-click export preserving all `###SECTION` headers* | *Auto-creates groups & adds stocks with live progress* |
+| ![Export from TradingView](assets/screenshot-1-export-tradingview.png) | ![Import preview on Zerodha Kite](assets/screenshot-2-import-preview-kite.png) |
+| *Copy the list with its `###SECTION` headers* | *See the groups and the symbols that are already in the list* |
+
+| 3. Stop pauses the import | 4. The result, with Retry |
+| :---: | :---: |
+| ![Import paused](assets/screenshot-3-import-paused-kite.png) | ![Import result](assets/screenshot-4-import-result-kite.png) |
+| *Continue the import or exit it* | *See what did not go in, retry it or copy it* |
+
+| 5. Export from Dhan | 6. Import into Dhan |
+| :---: | :---: |
+| ![Export from Dhan](assets/screenshot-5-export-dhan.png) | ![Import into Dhan](assets/screenshot-6-import-running-dhan.png) |
+| *The extension finds each ticker in Dhan's search* | *Live progress in the popup* |
 
 <p align="center">
-  <img src="assets/screenshot-3-smart-symbol-matching.png" alt="Smart Symbol Matching" width="85%">
+  <img src="assets/screenshot-7-import-preview-tradingview.png" alt="Import into TradingView" width="60%">
   <br>
-  <em>Intelligent symbol resolution & two-way synchronization engine</em>
+  <em>7. Import into TradingView: the whole list in one step</em>
 </p>
 
 ---
